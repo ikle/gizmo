@@ -35,7 +35,8 @@ static void dump (LDAP *o, LDAPMessage *m)
 			vals = ldap_get_values_len (o, e, name);
 
 			for (i = 0; vals[i] != NULL; ++i)
-				printf ("    %s = %s\n", name, vals[i]->bv_val);
+				printf ("    %s = %.*s\n", name,
+					(int) vals[i]->bv_len, vals[i]->bv_val);
 
 			ldap_value_free_len (vals);
 		}
