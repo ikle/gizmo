@@ -5,4 +5,6 @@ LIBNAME	= ldap-auth
 LIBVER	= 0
 LIBREV	= 0.1
 
+LDFLAGS += -lldap
+
 include make-core.mk
