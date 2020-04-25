@@ -1,0 +1,1 @@
+# LDAP Authentication Helper Library
