@@ -13,6 +13,7 @@
 
 struct ldap_auth_conf {
 	const char *uri;
+	const char *tls;	/* never, allow, try, demand */
 
 	const char *user;	/* bind DN */
 	const char *password;

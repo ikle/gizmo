@@ -14,8 +14,28 @@
 
 #include "ldap-auth.h"
 
+static int set_tls (LDAP *o, const char *tls)
+{
+	int opt;
+
+	if (tls == NULL)
+		return 1;
+
+	if      (strcmp (tls, "never")  == 0) opt = LDAP_OPT_X_TLS_NEVER;
+	else if (strcmp (tls, "allow")  == 0) opt = LDAP_OPT_X_TLS_ALLOW;
+	else if (strcmp (tls, "try")    == 0) opt = LDAP_OPT_X_TLS_TRY;
+	else if (strcmp (tls, "demand") == 0) opt = LDAP_OPT_X_TLS_DEMAND;
+	else
+		return 0;
+
+	return ldap_set_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt) == 0;
+}
+
 static int set_options (LDAP *o, const struct ldap_auth_conf *c)
 {
+	if (!set_tls (o, c->tls))
+		return 0;
+
 	if (c->cadir != NULL &&
 	    ldap_set_option (o, LDAP_OPT_X_TLS_CACERTDIR, &c->cadir) != 0)
 		return 0;
@@ -35,7 +55,7 @@ static int set_options (LDAP *o, const struct ldap_auth_conf *c)
 	return 1;
 }
 
-static int do_tls (LDAP *o)
+static int do_tls (LDAP *o, const struct ldap_auth_conf *c)
 {
 	void *ctx;
 
@@ -43,7 +63,8 @@ static int do_tls (LDAP *o)
 	    ctx == NULL)
 		return 1;  /* TLS started already */
 
-	return ldap_start_tls_s (o, NULL, NULL) == 0;
+	return	c->tls == NULL ||
+		ldap_start_tls_s (o, NULL, NULL) == 0;
 }
 
 LDAP *ldap_auth_open (const struct ldap_auth_conf *c)
@@ -58,7 +79,7 @@ LDAP *ldap_auth_open (const struct ldap_auth_conf *c)
 
 	if (ldap_set_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) != 0 ||
 	    !set_options (o, c) ||
-	    !do_tls (o))
+	    !do_tls (o, c))
 		goto error;
 
 	if (c->user != NULL) {
