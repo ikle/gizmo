@@ -57,13 +57,8 @@ static int set_options (LDAP *o, const struct ldap_auth_conf *c)
 
 static int do_tls (LDAP *o, const struct ldap_auth_conf *c)
 {
-	void *ctx;
-
-	if (ldap_get_option (o, LDAP_OPT_X_TLS_SSL_CTX, &ctx) == 0 &&
-	    ctx == NULL)
-		return 1;  /* TLS started already */
-
 	return	c->tls == NULL ||
+		strncmp (c->uri, "ldaps://", 8) == 0 ||
 		ldap_start_tls_s (o, NULL, NULL) == 0;
 }
 
