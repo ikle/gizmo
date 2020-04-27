@@ -49,7 +49,8 @@ int main (int argc, char *argv[])
 	struct ldap_auth o;
 	LDAPMessage *m;
 
-	c.uri    = "ldap:///";
+	c.uri    = "ldap://ikle-ldap";
+	c.tls    = "demand";
 	c.userdn = "ou=users,dc=example,dc=com";
 
 	if (!ldap_auth_init (&o, &c)) {
