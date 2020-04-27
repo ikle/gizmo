@@ -157,13 +157,17 @@ LDAPMessage *ldap_auth_login (struct ldap_auth *o,
 	if ((m = ldap_get_user (o, user)) == NULL)
 		return NULL;
 
-	if (ldap_count_entries (o->ldap, m) != 1)
+	if (ldap_count_entries (o->ldap, m) != 1) {
+		o->error = LDAP_NO_SUCH_OBJECT;
 		goto no_user;
+	}
 
 	e = ldap_first_entry (o->ldap, m);
 
-	if ((dn = ldap_get_dn (o->ldap, e)) == NULL)
+	if ((dn = ldap_get_dn (o->ldap, e)) == NULL) {
+		o->error = LDAP_LOCAL_ERROR;
 		goto no_dn;
+	}
 
 	cred.bv_val = password == NULL ? "" : (void *) password;
 	cred.bv_len = strlen (cred.bv_val);
@@ -172,8 +176,10 @@ LDAPMessage *ldap_auth_login (struct ldap_auth *o,
 				     NULL, NULL, NULL);
 	ldap_memfree (dn);
 
-	if (o->error != 0)
+	if (o->error != 0) {
 		goto no_auth;
+		o->error = LDAP_INVALID_CREDENTIALS;
+	}
 
 	return m;
 no_auth:
