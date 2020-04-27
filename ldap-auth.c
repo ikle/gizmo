@@ -14,8 +14,15 @@
 
 #include "ldap-auth.h"
 
-static int set_tls (LDAP *o, const char *tls)
+static int ldap_auth_set_option (struct ldap_auth *o, int option, const void *v)
 {
+	o->error = ldap_set_option (o->ldap, option, v);
+	return o->error == 0;
+}
+
+static int set_tls (struct ldap_auth *o)
+{
+	const char *tls = o->conf->tls;
 	int opt;
 
 	if (tls == NULL)
@@ -28,85 +35,85 @@ static int set_tls (LDAP *o, const char *tls)
 	else
 		return 0;
 
-	return ldap_set_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt) == 0;
+	return ldap_auth_set_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt);
 }
 
-static int set_options (LDAP *o, const struct ldap_auth_conf *c)
+static int set_options (struct ldap_auth *o)
 {
-	if (!set_tls (o, c->tls))
+	const struct ldap_auth_conf *c = o->conf;
+
+	if (!set_tls (o))
 		return 0;
 
 	if (c->cadir != NULL &&
-	    ldap_set_option (o, LDAP_OPT_X_TLS_CACERTDIR, &c->cadir) != 0)
+	    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTDIR, &c->cadir))
 		return 0;
 
 	if (c->ca != NULL &&
-	    ldap_set_option (o, LDAP_OPT_X_TLS_CACERTFILE, &c->ca) != 0)
+	    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTFILE, &c->ca))
 		return 0;
 
 	if (c->cert != NULL &&
-	    ldap_set_option (o, LDAP_OPT_X_TLS_CERTFILE, &c->cert) != 0)
+	    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CERTFILE, &c->cert))
 		return 0;
 
 	if (c->key != NULL &&
-	    ldap_set_option (o, LDAP_OPT_X_TLS_KEYFILE, &c->key) != 0)
+	    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_KEYFILE, &c->key))
 		return 0;
 
 	return 1;
 }
 
-static int do_tls (LDAP *o, const struct ldap_auth_conf *c)
+static int do_tls (struct ldap_auth *o)
 {
+	const struct ldap_auth_conf *c = o->conf;
+
 	return	c->tls == NULL ||
 		strncmp (c->uri, "ldaps://", 8) == 0 ||
-		ldap_start_tls_s (o, NULL, NULL) == 0;
+		ldap_start_tls_s (o->ldap, NULL, NULL) == 0;
 }
 
-LDAP *ldap_auth_open (const struct ldap_auth_conf *c)
+int ldap_auth_init (struct ldap_auth *o, const struct ldap_auth_conf *c)
 {
-	LDAP *o;
 	const int version = LDAP_VERSION3;
-	int rc;
 	struct berval cred;
 
-	if (c->uri == NULL || ldap_initialize (&o, c->uri) != 0)
-		return NULL;
+	o->conf = c;
 
-	if (ldap_set_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) != 0 ||
-	    !set_options (o, c) ||
-	    !do_tls (o, c))
+	if (c->uri == NULL || ldap_initialize (&o->ldap, c->uri) != 0)
+		return 0;
+
+	if (!ldap_auth_set_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) ||
+	    !set_options (o) ||
+	    !do_tls (o))
 		goto error;
 
 	if (c->user != NULL) {
 		cred.bv_val = c->password == NULL ? "" : (void *) c->password;
 		cred.bv_len = strlen (cred.bv_val);
 
-		rc = ldap_sasl_bind_s (o, c->user, LDAP_SASL_SIMPLE, &cred,
-				       NULL, NULL, NULL);
-		if (rc != 0)
+		o->error = ldap_sasl_bind_s (o->ldap, c->user, LDAP_SASL_SIMPLE,
+					     &cred, NULL, NULL, NULL);
+		if (o->error != 0)
 			goto error;
 	}
 
-	return o;
+	return 1;
 error:
-	ldap_destroy (o);
-	return NULL;
+	ldap_destroy (o->ldap);
+	return 0;
 }
 
-void ldap_auth_close (LDAP *o)
+void ldap_auth_fini (struct ldap_auth *o)
 {
-	if (o == NULL)
-		return;
-
-	ldap_destroy (o);
+	ldap_destroy (o->ldap);
 }
 
-static LDAPMessage *
-ldap_get_user (LDAP *o, const struct ldap_auth_conf *c, const char *user)
+static LDAPMessage *ldap_get_user (struct ldap_auth *o, const char *user)
 {
+	const struct ldap_auth_conf *c = o->conf;
 	int len;
 	char *filter;
-	int rc;
 	LDAPMessage *m;
 
 #define POSIX_FILTER	"(&(uid=%1$s)(objectClass=posixAccount))"
@@ -120,11 +127,12 @@ ldap_get_user (LDAP *o, const struct ldap_auth_conf *c, const char *user)
 
 	snprintf (filter, len, FILTER, user);
 
-	rc = ldap_search_ext_s (o, c->userdn, LDAP_SCOPE_SUBTREE, filter,
-				NULL, 0, NULL, NULL, NULL, LDAP_NO_LIMIT, &m);
+	o->error = ldap_search_ext_s (o->ldap, c->userdn, LDAP_SCOPE_SUBTREE,
+				      filter, NULL, 0,
+				      NULL, NULL, NULL, LDAP_NO_LIMIT, &m);
 	free (filter);
 
-	if (rc != 0)
+	if (o->error != 0)
 		return NULL;
 
 #undef FILTER
@@ -134,34 +142,32 @@ ldap_get_user (LDAP *o, const struct ldap_auth_conf *c, const char *user)
 	return m;
 }
 
-LDAPMessage *
-ldap_auth_login (LDAP *o, const struct ldap_auth_conf *c,
-		 const char *user, const char *password)
+LDAPMessage *ldap_auth_login (struct ldap_auth *o,
+			      const char *user, const char *password)
 {
 	LDAPMessage *m, *e;
 	char *dn;
 	struct berval cred;
-	int rc;
 
-	if ((m = ldap_get_user (o, c, user)) == NULL)
+	if ((m = ldap_get_user (o, user)) == NULL)
 		return NULL;
 
-	if (ldap_count_entries (o, m) > 1)
+	if (ldap_count_entries (o->ldap, m) > 1)
 		goto no_unique;
 
-	e = ldap_first_entry (o, m);
+	e = ldap_first_entry (o->ldap, m);
 
-	if ((dn = ldap_get_dn (o, e)) == NULL)
+	if ((dn = ldap_get_dn (o->ldap, e)) == NULL)
 		goto no_dn;
 
 	cred.bv_val = password == NULL ? "" : (void *) password;
 	cred.bv_len = strlen (cred.bv_val);
 
-	rc = ldap_sasl_bind_s (o, dn, LDAP_SASL_SIMPLE, &cred,
-			       NULL, NULL, NULL);
+	o->error = ldap_sasl_bind_s (o->ldap, dn, LDAP_SASL_SIMPLE, &cred,
+				     NULL, NULL, NULL);
 	ldap_memfree (dn);
 
-	if (rc != 0)
+	if (o->error != 0)
 		goto no_auth;
 
 	return m;

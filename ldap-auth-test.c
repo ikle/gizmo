@@ -46,28 +46,28 @@ static void dump (LDAP *o, LDAPMessage *m)
 int main (int argc, char *argv[])
 {
 	struct ldap_auth_conf c = {};
-	LDAP *o;
+	struct ldap_auth o;
 	LDAPMessage *m;
 
 	c.uri    = "ldap:///";
 	c.userdn = "ou=users,dc=example,dc=com";
 
-	if ((o = ldap_auth_open (&c)) == NULL) {
+	if (!ldap_auth_init (&o, &c)) {
 		perror ("cannot open LDAP connection");
 		return 1;
 	}
 
-	if ((m = ldap_auth_login (o, &c, "alice", "Qwe123$-alice")) == NULL) {
+	if ((m = ldap_auth_login (&o, "alice", "Qwe123$-alice")) == NULL) {
 		perror ("cannot authenticate user");
 		goto no_auth;
 	}
 
-	dump (o, m);
+	dump (o.ldap, m);
 
 	ldap_msgfree (m);
-	ldap_auth_close (o);
+	ldap_auth_fini (&o);
 	return 0;
 no_auth:
-	ldap_auth_close (o);
+	ldap_auth_fini (&o);
 	return 1;
 }
