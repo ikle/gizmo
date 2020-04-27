@@ -157,8 +157,8 @@ LDAPMessage *ldap_auth_login (struct ldap_auth *o,
 	if ((m = ldap_get_user (o, user)) == NULL)
 		return NULL;
 
-	if (ldap_count_entries (o->ldap, m) > 1)
-		goto no_unique;
+	if (ldap_count_entries (o->ldap, m) != 1)
+		goto no_user;
 
 	e = ldap_first_entry (o->ldap, m);
 
@@ -178,7 +178,7 @@ LDAPMessage *ldap_auth_login (struct ldap_auth *o,
 	return m;
 no_auth:
 no_dn:
-no_unique:
+no_user:
 	ldap_msgfree (m);
 	return NULL;
 }
