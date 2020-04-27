@@ -109,6 +109,11 @@ void ldap_auth_fini (struct ldap_auth *o)
 	ldap_destroy (o->ldap);
 }
 
+const char *ldap_auth_error (const struct ldap_auth *o)
+{
+	return ldap_err2string (o->error);
+}
+
 static LDAPMessage *ldap_get_user (struct ldap_auth *o, const char *user)
 {
 	const struct ldap_auth_conf *c = o->conf;

@@ -54,12 +54,14 @@ int main (int argc, char *argv[])
 	c.userdn = "ou=users,dc=example,dc=com";
 
 	if (!ldap_auth_init (&o, &c)) {
-		perror ("cannot open LDAP connection");
+		fprintf (stderr, "E: Cannot open LDAP connection: %s\n",
+			 ldap_auth_error (&o));
 		return 1;
 	}
 
 	if ((m = ldap_auth_login (&o, "alice", "Qwe123$-alice")) == NULL) {
-		perror ("cannot authenticate user");
+		fprintf (stderr, "E: Cannot authenticate user: %s\n",
+				 ldap_auth_error (&o));
 		goto no_auth;
 	}
 
