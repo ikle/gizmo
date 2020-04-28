@@ -173,6 +173,31 @@ int ldap_get_user (struct ldap_auth *o, const char *user)
 	return o->error == 0;
 }
 
+int ldap_check_role (struct ldap_auth *o, const char *dn)
+{
+	static const char *attrs[] = { "member", "roleOccupant", };
+	static const char *filter =
+		"(|"
+		"(&(cn=%1$s)(member=%2$s))"
+		"(&(cn=%1$s)(roleOccupant=%2$s))"
+		")";
+	LDAPMessage *m, *e;
+	int match;
+
+	if (o->conf->role == NULL)
+		return 1;
+
+	m = ldap_fetch (o, o->conf->roledn, attrs, filter, o->conf->role, dn);
+	e = ldap_first_entry (o->ldap, m);
+	match = o->error == 0 && ldap_count_entries (o->ldap, e) > 0;
+	ldap_msgfree (m);
+
+	if (!match)
+		o->error = LDAP_INSUFFICIENT_ACCESS;
+
+	return match;
+}
+
 int ldap_auth_login (struct ldap_auth *o,
 		     const char *user, const char *password)
 {
@@ -195,18 +220,22 @@ int ldap_auth_login (struct ldap_auth *o,
 		goto no_dn;
 	}
 
+	if (!ldap_check_role (o, dn))
+		goto no_role;
+
 	cred.bv_val = password == NULL ? "" : (void *) password;
 	cred.bv_len = strlen (cred.bv_val);
 
 	o->error = ldap_sasl_bind_s (o->ldap, dn, LDAP_SASL_SIMPLE, &cred,
 				     NULL, NULL, NULL);
-	ldap_memfree (dn);
-
 	if (o->error != 0)
 		goto no_auth;
 
+	ldap_memfree (dn);
 	return 1;
 no_auth:
+no_role:
+	ldap_memfree (dn);
 no_dn:
 no_user:
 	ldap_msgfree (o->answer);

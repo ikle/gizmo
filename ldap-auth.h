@@ -17,6 +17,7 @@ struct ldap_auth_conf {
 
 	const char *user;	/* bind DN */
 	const char *password;
+	const char *role;	/* CN of group or role DN needed for auth */
 
 	const char *cadir;
 	const char *ca;
@@ -24,6 +25,7 @@ struct ldap_auth_conf {
 	const char *key;
 
 	const char *userdn;
+	const char *roledn;	/* group or role base DN */
 };
 
 struct ldap_auth {
