@@ -10,7 +10,7 @@
 
 #include "ldap-auth.h"
 
-static void dump (LDAP *o, LDAPMessage *m)
+static void dump (const struct ldap_auth *o)
 {
 	LDAPMessage *e;
 	char *name;
@@ -19,20 +19,20 @@ static void dump (LDAP *o, LDAPMessage *m)
 	size_t i;
 
 	for (
-		e = ldap_first_entry (o, m);
+		e = ldap_first_entry (o->ldap, o->answer);
 		e != NULL;
-		e = ldap_next_entry (o, e)
+		e = ldap_next_entry (o->ldap, e)
 	) {
-		name = ldap_get_dn (o, e);
+		name = ldap_get_dn (o->ldap, e);
 		printf ("%s:\n", name);
 		ldap_memfree (name);
 
 		for (
-			name = ldap_first_attribute (o, e, &be);
+			name = ldap_first_attribute (o->ldap, e, &be);
 			name != NULL;
-			name = ldap_next_attribute (o, e, be)
+			name = ldap_next_attribute (o->ldap, e, be)
 		) {
-			vals = ldap_get_values_len (o, e, name);
+			vals = ldap_get_values_len (o->ldap, e, name);
 
 			for (i = 0; vals[i] != NULL; ++i)
 				printf ("    %s = %.*s\n", name,
@@ -64,7 +64,7 @@ int main (int argc, char *argv[])
 		goto no_auth;
 	}
 
-	dump (o.ldap, o.answer);
+	dump (&o);
 
 	ldap_auth_fini (&o);
 	return 0;
