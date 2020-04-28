@@ -178,8 +178,8 @@ static int ldap_check_role (struct ldap_auth *o, const char *dn)
 	static const char *attrs[] = { "member", "roleOccupant", };
 	static const char *filter =
 		"(|"
-		"(&(cn=%1$s)(member=%2$s))"
-		"(&(cn=%1$s)(roleOccupant=%2$s))"
+		"(&(cn=%1$s)(member=%2$s)(ObjectClass=Group))"
+		"(&(cn=%1$s)(roleOccupant=%2$s)(ObjectClass=organizationalRole))"
 		")";
 	LDAPMessage *m, *e;
 	int match;
