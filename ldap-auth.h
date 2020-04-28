@@ -40,5 +40,6 @@ const char *ldap_auth_error (const struct ldap_auth *o);
 
 int ldap_auth_login (struct ldap_auth *o,
 		     const char *user, const char *password);
+char *ldap_auth_get_uid (struct ldap_auth *o);
 
 #endif  /* LDAP_AUTH */

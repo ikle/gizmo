@@ -190,3 +190,29 @@ no_user:
 	o->answer = NULL;
 	return 0;
 }
+
+char *ldap_auth_get_uid (struct ldap_auth *o)
+{
+	LDAPMessage *e;
+	struct berval **vals;
+	char *uid;
+
+	if (o->answer == NULL ||
+	    (e = ldap_first_entry (o->ldap, o->answer)) == NULL)
+		goto no_attr;
+
+	if ((vals = ldap_get_values_len (o->ldap, e, "uid")) == NULL &&
+	    (vals = ldap_get_values_len (o->ldap, e, "sAMAccountName")) == NULL)
+		goto no_attr;
+
+	uid = strdup (vals[0]->bv_val);
+	ldap_value_free_len (vals);
+
+	if (uid == NULL)
+		o->error = LDAP_NO_MEMORY;
+
+	return uid;
+no_attr:
+	o->error = LDAP_NO_SUCH_ATTRIBUTE;
+	return NULL;
+}

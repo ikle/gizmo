@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "ldap-auth.h"
 
@@ -53,6 +54,7 @@ int main (int argc, char *argv[])
 {
 	struct ldap_auth_conf c = {};
 	struct ldap_auth o;
+	char *uid;
 
 	c.uri    = "ldap://ikle-ldap";
 	c.tls    = "demand";
@@ -68,6 +70,11 @@ int main (int argc, char *argv[])
 		fprintf (stderr, "E: Cannot authenticate user: %s\n",
 				 ldap_auth_error (&o));
 		goto no_auth;
+	}
+
+	if ((uid = ldap_auth_get_uid (&o)) != NULL) {
+		printf ("I: Logged in as %s\n\n", uid);
+		free (uid);
 	}
 
 	dump (&o);
