@@ -121,9 +121,10 @@ static LDAPMessage *ldap_get_user (struct ldap_auth *o, const char *user)
 	char *filter;
 	LDAPMessage *m;
 
+#define CORE_FILTER	"(&(cn=%1$s)(objectClass=person))"
 #define POSIX_FILTER	"(&(uid=%1$s)(objectClass=posixAccount))"
 #define AD_FILTER	"(&(sAMAccountName=%1$s)(ObjectClass=User))"
-#define FILTER		"(|" POSIX_FILTER AD_FILTER ")"
+#define FILTER		"(|" CORE_FILTER POSIX_FILTER AD_FILTER ")"
 
 	len = snprintf (NULL, 0, FILTER, user) + 1;
 
@@ -143,6 +144,7 @@ static LDAPMessage *ldap_get_user (struct ldap_auth *o, const char *user)
 #undef FILTER
 #undef AD_FILTER
 #undef POSIX_FILTER
+#undef CORE_FILTER
 
 	return m;
 }
