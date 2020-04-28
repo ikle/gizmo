@@ -79,9 +79,11 @@ int ldap_auth_init (struct ldap_auth *o, const struct ldap_auth_conf *c)
 	struct berval cred;
 
 	o->conf = c;
+	o->error = LDAP_PARAM_ERROR;
 	o->answer = NULL;
 
-	if (c->uri == NULL || ldap_initialize (&o->ldap, c->uri) != 0)
+	if (c->uri == NULL ||
+	    (o->error = ldap_initialize (&o->ldap, c->uri) != 0))
 		return 0;
 
 	if (!ldap_auth_set_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) ||
