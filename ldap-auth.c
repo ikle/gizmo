@@ -142,15 +142,12 @@ int ldap_get_user (struct ldap_auth *o, const char *user)
 				      LDAP_NO_LIMIT, &o->answer);
 	free (filter);
 
-	if (o->error != 0)
-		return 0;
-
 #undef FILTER
 #undef AD_FILTER
 #undef POSIX_FILTER
 #undef CORE_FILTER
 
-	return 1;
+	return o->error == 0;
 }
 
 int ldap_auth_login (struct ldap_auth *o,
