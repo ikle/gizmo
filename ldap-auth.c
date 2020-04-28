@@ -182,15 +182,14 @@ static int ldap_check_role (struct ldap_auth *o, const char *dn)
 		"(&(cn=%1$s)(uniqueMember=%2$s)(ObjectClass=groupOfUniqueNames))"
 		"(&(cn=%1$s)(roleOccupant=%2$s)(ObjectClass=organizationalRole))"
 		")";
-	LDAPMessage *m, *e;
+	LDAPMessage *m;
 	int match;
 
 	if (o->conf->role == NULL)
 		return 1;
 
 	m = ldap_fetch (o, o->conf->roledn, attrs, filter, o->conf->role, dn);
-	e = ldap_first_entry (o->ldap, m);
-	match = o->error == 0 && ldap_count_entries (o->ldap, e) > 0;
+	match = o->error == 0 && ldap_count_entries (o->ldap, m) > 0;
 	ldap_msgfree (m);
 
 	if (!match)
