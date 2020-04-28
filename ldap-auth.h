@@ -30,6 +30,7 @@ struct ldap_auth {
 	const struct ldap_auth_conf *conf;
 	LDAP *ldap;
 	int error;
+	LDAPMessage *answer;
 };
 
 int  ldap_auth_init (struct ldap_auth *o, const struct ldap_auth_conf *c);
@@ -37,7 +38,7 @@ void ldap_auth_fini (struct ldap_auth *o);
 
 const char *ldap_auth_error (const struct ldap_auth *o);
 
-LDAPMessage *ldap_auth_login (struct ldap_auth *o,
-			      const char *user, const char *password);
+int ldap_auth_login (struct ldap_auth *o,
+		     const char *user, const char *password);
 
 #endif  /* LDAP_AUTH */

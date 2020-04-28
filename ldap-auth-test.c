@@ -47,7 +47,6 @@ int main (int argc, char *argv[])
 {
 	struct ldap_auth_conf c = {};
 	struct ldap_auth o;
-	LDAPMessage *m;
 
 	c.uri    = "ldap://ikle-ldap";
 	c.tls    = "demand";
@@ -59,15 +58,14 @@ int main (int argc, char *argv[])
 		return 1;
 	}
 
-	if ((m = ldap_auth_login (&o, "alice", "Qwe123$-alice")) == NULL) {
+	if (!ldap_auth_login (&o, "alice", "Qwe123$-alice")) {
 		fprintf (stderr, "E: Cannot authenticate user: %s\n",
 				 ldap_auth_error (&o));
 		goto no_auth;
 	}
 
-	dump (o.ldap, m);
+	dump (o.ldap, o.answer);
 
-	ldap_msgfree (m);
 	ldap_auth_fini (&o);
 	return 0;
 no_auth:

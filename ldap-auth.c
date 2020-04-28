@@ -79,6 +79,7 @@ int ldap_auth_init (struct ldap_auth *o, const struct ldap_auth_conf *c)
 	struct berval cred;
 
 	o->conf = c;
+	o->answer = NULL;
 
 	if (c->uri == NULL || ldap_initialize (&o->ldap, c->uri) != 0)
 		return 0;
@@ -106,6 +107,7 @@ error:
 
 void ldap_auth_fini (struct ldap_auth *o)
 {
+	ldap_msgfree (o->answer);
 	ldap_destroy (o->ldap);
 }
 
@@ -114,12 +116,11 @@ const char *ldap_auth_error (const struct ldap_auth *o)
 	return ldap_err2string (o->error);
 }
 
-static LDAPMessage *ldap_get_user (struct ldap_auth *o, const char *user)
+int ldap_get_user (struct ldap_auth *o, const char *user)
 {
 	const struct ldap_auth_conf *c = o->conf;
 	int len;
 	char *filter;
-	LDAPMessage *m;
 
 #define CORE_FILTER	"(&(cn=%1$s)(objectClass=person))"
 #define POSIX_FILTER	"(&(uid=%1$s)(objectClass=posixAccount))"
@@ -129,42 +130,43 @@ static LDAPMessage *ldap_get_user (struct ldap_auth *o, const char *user)
 	len = snprintf (NULL, 0, FILTER, user) + 1;
 
 	if ((filter = malloc (len)) == NULL)
-		return NULL;
+		return 0;
 
 	snprintf (filter, len, FILTER, user);
 
 	o->error = ldap_search_ext_s (o->ldap, c->userdn, LDAP_SCOPE_SUBTREE,
 				      filter, NULL, 0,
-				      NULL, NULL, NULL, LDAP_NO_LIMIT, &m);
+				      NULL, NULL, NULL,
+				      LDAP_NO_LIMIT, &o->answer);
 	free (filter);
 
 	if (o->error != 0)
-		return NULL;
+		return 0;
 
 #undef FILTER
 #undef AD_FILTER
 #undef POSIX_FILTER
 #undef CORE_FILTER
 
-	return m;
+	return 1;
 }
 
-LDAPMessage *ldap_auth_login (struct ldap_auth *o,
-			      const char *user, const char *password)
+int ldap_auth_login (struct ldap_auth *o,
+		     const char *user, const char *password)
 {
-	LDAPMessage *m, *e;
+	LDAPMessage *e;
 	char *dn;
 	struct berval cred;
 
-	if ((m = ldap_get_user (o, user)) == NULL)
-		return NULL;
+	if (!ldap_get_user (o, user))
+		return 0;
 
-	if (ldap_count_entries (o->ldap, m) != 1) {
+	if (ldap_count_entries (o->ldap, o->answer) != 1) {
 		o->error = LDAP_NO_SUCH_OBJECT;
 		goto no_user;
 	}
 
-	e = ldap_first_entry (o->ldap, m);
+	e = ldap_first_entry (o->ldap, o->answer);
 
 	if ((dn = ldap_get_dn (o->ldap, e)) == NULL) {
 		o->error = LDAP_LOCAL_ERROR;
@@ -183,10 +185,11 @@ LDAPMessage *ldap_auth_login (struct ldap_auth *o,
 		o->error = LDAP_INVALID_CREDENTIALS;
 	}
 
-	return m;
+	return 1;
 no_auth:
 no_dn:
 no_user:
-	ldap_msgfree (m);
-	return NULL;
+	ldap_msgfree (o->answer);
+	o->answer = NULL;
+	return 0;
 }
