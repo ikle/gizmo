@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -118,35 +119,57 @@ const char *ldap_auth_error (const struct ldap_auth *o)
 	return ldap_err2string (o->error);
 }
 
-int ldap_get_user (struct ldap_auth *o, const char *user)
+static LDAPMessage *
+ldap_fetch_va (struct ldap_auth *o, const char *basedn, const char *attrs[],
+	       const char *fmt, va_list ap)
 {
-	const struct ldap_auth_conf *c = o->conf;
 	int len;
 	char *filter;
+	LDAPMessage *m;
 
-#define CORE_FILTER	"(&(cn=%1$s)(objectClass=person))"
-#define POSIX_FILTER	"(&(uid=%1$s)(objectClass=posixAccount))"
-#define AD_FILTER	"(&(sAMAccountName=%1$s)(ObjectClass=User))"
-#define FILTER		"(|" CORE_FILTER POSIX_FILTER AD_FILTER ")"
-
-	len = snprintf (NULL, 0, FILTER, user) + 1;
+	len = vsnprintf (NULL, 0, fmt, ap) + 1;
 
 	if ((filter = malloc (len)) == NULL)
 		return 0;
 
-	snprintf (filter, len, FILTER, user);
+	vsnprintf (filter, len, fmt, ap);
 
-	o->error = ldap_search_ext_s (o->ldap, c->userdn, LDAP_SCOPE_SUBTREE,
-				      filter, NULL, 0,
+	o->error = ldap_search_ext_s (o->ldap, basedn, LDAP_SCOPE_SUBTREE,
+				      filter, (char **) attrs, 0,
 				      NULL, NULL, NULL,
-				      LDAP_NO_LIMIT, &o->answer);
+				      LDAP_NO_LIMIT, &m);
 	free (filter);
 
-#undef FILTER
-#undef AD_FILTER
-#undef POSIX_FILTER
-#undef CORE_FILTER
+	if (o->error == 0)
+		return m;
 
+	ldap_msgfree (m);
+	return NULL;
+}
+
+static LDAPMessage *
+ldap_fetch (struct ldap_auth *o, const char *basedn, const char *attrs[],
+	    const char *fmt, ...)
+{
+	va_list ap;
+	LDAPMessage *m;
+
+	va_start (ap, fmt);
+	m = ldap_fetch_va (o, basedn, attrs, fmt, ap);
+	va_end (ap);
+	return m;
+}
+
+int ldap_get_user (struct ldap_auth *o, const char *user)
+{
+	static const char *filter =
+		"(|"
+		"(&(cn=%1$s)(objectClass=person))"
+		"(&(uid=%1$s)(objectClass=posixAccount))"
+		"(&(sAMAccountName=%1$s)(ObjectClass=User))"
+		")";
+
+	o->answer = ldap_fetch (o, o->conf->userdn, NULL, filter, user);
 	return o->error == 0;
 }
 
