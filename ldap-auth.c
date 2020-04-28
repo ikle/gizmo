@@ -179,10 +179,8 @@ int ldap_auth_login (struct ldap_auth *o,
 				     NULL, NULL, NULL);
 	ldap_memfree (dn);
 
-	if (o->error != 0) {
+	if (o->error != 0)
 		goto no_auth;
-		o->error = LDAP_INVALID_CREDENTIALS;
-	}
 
 	return 1;
 no_auth:
