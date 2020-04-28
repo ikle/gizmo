@@ -160,7 +160,7 @@ ldap_fetch (struct ldap_auth *o, const char *basedn, const char *attrs[],
 	return m;
 }
 
-int ldap_get_user (struct ldap_auth *o, const char *user)
+static int ldap_get_user (struct ldap_auth *o, const char *user)
 {
 	static const char *filter =
 		"(|"
@@ -173,7 +173,7 @@ int ldap_get_user (struct ldap_auth *o, const char *user)
 	return o->error == 0;
 }
 
-int ldap_check_role (struct ldap_auth *o, const char *dn)
+static int ldap_check_role (struct ldap_auth *o, const char *dn)
 {
 	static const char *attrs[] = { "member", "roleOccupant", };
 	static const char *filter =
