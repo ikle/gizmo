@@ -147,9 +147,6 @@ int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
 	    !do_tls (o, uri))
 		goto error;
 
-	if (!ldap_auth_bind (o, o->user, o->password))
-		goto error;
-
 	return 1;
 error:
 	ldap_destroy (o->ldap);
@@ -263,7 +260,8 @@ int ldap_auth_login (struct ldap_auth *o,
 	LDAPMessage *e;
 	char *dn;
 
-	if (!ldap_get_user (o, user))
+	if (!ldap_auth_bind (o, o->user, o->password)||
+	    !ldap_get_user (o, user))
 		return 0;
 
 	if (ldap_count_entries (o->ldap, o->answer) != 1) {
