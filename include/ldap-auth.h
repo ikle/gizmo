@@ -12,23 +12,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include <ldap.h>
-
-struct ldap_auth {
-	LDAP *ldap;
-	int error;
-	LDAPMessage *answer;
-
-	int tls;
-
-	const char *user;	/* bind DN */
-	const char *password;
-
-	const char *userdn;
-	const char *role;	/* CN of group or role DN needed for auth */
-	const char *roledn;	/* group or role base DN */
-};
-
 struct ldap_auth *ldap_auth_alloc_va (const char *uri, va_list ap);
 struct ldap_auth *ldap_auth_alloc    (const char *uri, ...);
 void ldap_auth_free (struct ldap_auth *o);

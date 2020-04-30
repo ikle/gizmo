@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include "ldap-auth.h"
+#include "ldap-auth-int.h"
 
 static char *ldap_auth_get (struct ldap_auth *o, const char *attrs[])
 {

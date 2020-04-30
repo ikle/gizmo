@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-#include "ldap-auth.h"
+#include "ldap-auth-int.h"
 
 static int ldap_auth_set_option (struct ldap_auth *o, int option, const void *v)
 {

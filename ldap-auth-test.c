@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "ldap-auth.h"
+#include <ldap-auth.h>
 
 int main (int argc, char *argv[])
 {
