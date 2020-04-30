@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,21 +63,40 @@ error:
 	return 0;
 }
 
-int ldap_auth_init (struct ldap_auth *o, const char *uri, ...)
+struct ldap_auth *ldap_auth_alloc_va (const char *uri, va_list ap)
 {
-	va_list ap;
-	int rc;
+	struct ldap_auth *o;
 
-	va_start (ap, uri);
-	rc = ldap_auth_init_va (o, uri, ap);
-	va_end (ap);
-	return rc;
+	if ((o = malloc (sizeof (*o))) == NULL)
+		return NULL;
+
+	if (ldap_auth_init_va (o, uri, ap))
+		return o;
+
+	free (o);
+	errno = EPROTO;
+	return NULL;
 }
 
-void ldap_auth_fini (struct ldap_auth *o)
+struct ldap_auth *ldap_auth_alloc (const char *uri, ...)
 {
+	va_list ap;
+	struct ldap_auth *o;
+
+	va_start (ap, uri);
+	o = ldap_auth_alloc_va (uri, ap);
+	va_end (ap);
+	return o;
+}
+
+void ldap_auth_free (struct ldap_auth *o)
+{
+	if (o == NULL)
+		return;
+
 	ldap_msgfree (o->answer);
 	ldap_destroy (o->ldap);
+	free (o);
 }
 
 const char *ldap_auth_error (const struct ldap_auth *o)
