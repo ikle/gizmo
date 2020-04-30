@@ -21,10 +21,11 @@ static int ldap_auth_set_option (struct ldap_auth *o, int option, const void *v)
 	return o->error == 0;
 }
 
-static int set_tls (struct ldap_auth *o)
+static int set_tls (struct ldap_auth *o, const char *tls)
 {
-	const char *tls = o->conf->tls;
 	int opt;
+
+	o->tls = 0;
 
 	if (tls == NULL)
 		return 1;
@@ -36,51 +37,90 @@ static int set_tls (struct ldap_auth *o)
 	else
 		return 0;
 
+	o->tls = 1;
 	return ldap_auth_set_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt);
 }
 
-static int set_options (struct ldap_auth *o)
+static int set_option (struct ldap_auth *o, const char *name, const char *value)
 {
-	const struct ldap_auth_conf *c = o->conf;
+	if (strcmp (name, "user") == 0)
+		o->user = value;
 
-	if (!set_tls (o))
-		return 0;
+	else if (strcmp (name, "password") == 0)
+		o->password = value;
 
-	if (c->cadir != NULL &&
-	    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTDIR, &c->cadir))
-		return 0;
+	else if (strcmp (name, "userdn") == 0)
+		o->userdn = value;
 
-	if (c->ca != NULL &&
-	    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTFILE, &c->ca))
-		return 0;
+	else if (strcmp (name, "role") == 0)
+		o->role = value;
 
-	if (c->cert != NULL &&
-	    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CERTFILE, &c->cert))
-		return 0;
+	else if (strcmp (name, "roledn") == 0)
+		o->roledn = value;
 
-	if (c->key != NULL &&
-	    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_KEYFILE, &c->key))
-		return 0;
+	else if (strcmp (name, "tls") == 0) {
+		if (!set_tls (o, value))
+			return 0;
+	}
+	else if (strcmp (name, "cadir") == 0) {
+		if (value != NULL &&
+		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTDIR, value))
+			return 0;
+	}
+	else if (strcmp (name, "ca") == 0) {
+		if (value != NULL &&
+		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTFILE, value))
+			return 0;
+	}
+	else if (strcmp (name, "cert") == 0) {
+		if (value != NULL &&
+		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CERTFILE, value))
+			return 0;
+	}
+	else if (strcmp (name, "key") == 0) {
+		if (value != NULL &&
+		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_KEYFILE, value))
+			return 0;
+	}
+
+	return 1;
+}
+
+static int set_options (struct ldap_auth *o, va_list ap)
+{
+	const char *name, *value;
+
+	o->tls = 0;
+
+	o->user		= NULL;
+	o->password	= NULL;
+
+	o->userdn	= NULL;
+	o->role		= NULL;
+	o->roledn	= NULL;
+
+	while ((name = va_arg (ap, const char *)) != NULL) {
+		value = va_arg (ap, const char *);
+
+		if (!set_option (o, name, value))
+			return 0;
+	}
 
 	return 1;
 }
 
 static int do_tls (struct ldap_auth *o, const char *uri)
 {
-	const struct ldap_auth_conf *c = o->conf;
-
-	return	c->tls == NULL ||
+	return	!o->tls ||
 		strncmp (uri, "ldaps://", 8) == 0 ||
 		ldap_start_tls_s (o->ldap, NULL, NULL) == 0;
 }
 
-int ldap_auth_init (struct ldap_auth *o, const char *uri,
-		    const struct ldap_auth_conf *c)
+int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
 {
 	const int version = LDAP_VERSION3;
 	struct berval cred;
 
-	o->conf = c;
 	o->error = LDAP_PARAM_ERROR;
 	o->answer = NULL;
 
@@ -89,15 +129,15 @@ int ldap_auth_init (struct ldap_auth *o, const char *uri,
 		return 0;
 
 	if (!ldap_auth_set_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) ||
-	    !set_options (o) ||
+	    !set_options (o, ap) ||
 	    !do_tls (o, uri))
 		goto error;
 
-	if (c->user != NULL) {
-		cred.bv_val = c->password == NULL ? "" : (void *) c->password;
+	if (o->user != NULL) {
+		cred.bv_val = o->password == NULL ? "" : (void *) o->password;
 		cred.bv_len = strlen (cred.bv_val);
 
-		o->error = ldap_sasl_bind_s (o->ldap, c->user, LDAP_SASL_SIMPLE,
+		o->error = ldap_sasl_bind_s (o->ldap, o->user, LDAP_SASL_SIMPLE,
 					     &cred, NULL, NULL, NULL);
 		if (o->error != 0)
 			goto error;
@@ -107,6 +147,17 @@ int ldap_auth_init (struct ldap_auth *o, const char *uri,
 error:
 	ldap_destroy (o->ldap);
 	return 0;
+}
+
+int ldap_auth_init (struct ldap_auth *o, const char *uri, ...)
+{
+	va_list ap;
+	int rc;
+
+	va_start (ap, uri);
+	rc = ldap_auth_init_va (o, uri, ap);
+	va_end (ap);
+	return rc;
 }
 
 void ldap_auth_fini (struct ldap_auth *o)
@@ -170,7 +221,7 @@ static int ldap_get_user (struct ldap_auth *o, const char *user)
 		"(&(sAMAccountName=%1$s)(ObjectClass=User))"
 		")";
 
-	o->answer = ldap_fetch (o, o->conf->userdn, NULL, filter, user);
+	o->answer = ldap_fetch (o, o->userdn, NULL, filter, user);
 	return o->error == 0;
 }
 
@@ -186,10 +237,10 @@ static int ldap_check_role (struct ldap_auth *o, const char *dn)
 	LDAPMessage *m;
 	int match;
 
-	if (o->conf->role == NULL)
+	if (o->role == NULL)
 		return 1;
 
-	m = ldap_fetch (o, o->conf->roledn, attrs, filter, o->conf->role, dn);
+	m = ldap_fetch (o, o->roledn, attrs, filter, o->role, dn);
 	match = o->error == 0 && ldap_count_entries (o->ldap, m) > 0;
 	ldap_msgfree (m);
 

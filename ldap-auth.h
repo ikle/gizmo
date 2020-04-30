@@ -11,31 +11,22 @@
 
 #include <ldap.h>
 
-struct ldap_auth_conf {
-	const char *tls;	/* never, allow, try, demand */
-
-	const char *user;	/* bind DN */
-	const char *password;
-	const char *role;	/* CN of group or role DN needed for auth */
-
-	const char *cadir;
-	const char *ca;
-	const char *cert;
-	const char *key;
-
-	const char *userdn;
-	const char *roledn;	/* group or role base DN */
-};
-
 struct ldap_auth {
-	const struct ldap_auth_conf *conf;
 	LDAP *ldap;
 	int error;
 	LDAPMessage *answer;
+
+	int tls;
+
+	const char *user;	/* bind DN */
+	const char *password;
+
+	const char *userdn;
+	const char *role;	/* CN of group or role DN needed for auth */
+	const char *roledn;	/* group or role base DN */
 };
 
-int  ldap_auth_init (struct ldap_auth *o, const char *uri,
-		     const struct ldap_auth_conf *c);
+int  ldap_auth_init (struct ldap_auth *o, const char *uri, ...);
 void ldap_auth_fini (struct ldap_auth *o);
 
 const char *ldap_auth_error (const struct ldap_auth *o);

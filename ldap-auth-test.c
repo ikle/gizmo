@@ -52,14 +52,12 @@ static void dump (const struct ldap_auth *o)
 
 int main (int argc, char *argv[])
 {
-	struct ldap_auth_conf c = {};
 	struct ldap_auth o;
 	char *uid;
 
-	c.tls    = "demand";
-	c.userdn = "ou=users,dc=example,dc=com";
-
-	if (!ldap_auth_init (&o, "ldap://ikle-ldap", &c)) {
+	if (!ldap_auth_init (&o, "ldap://ikle-ldap", "tls", "demand",
+			     "userdn", "ou=users,dc=example,dc=com",
+			     NULL)) {
 		fprintf (stderr, "E: Cannot open LDAP connection: %s\n",
 			 ldap_auth_error (&o));
 		return 1;
