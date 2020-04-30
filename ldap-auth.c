@@ -19,10 +19,10 @@ static int ldap_auth_set_option (struct ldap_auth *o, int option, const void *v)
 	return o->error == 0;
 }
 
-static int do_tls (struct ldap_auth *o, const char *uri)
+static int start_tls (struct ldap_auth *o)
 {
-	return	!o->tls ||
-		strncmp (uri, "ldaps://", 8) == 0 ||
+	return	(o->flags & LDAP_AUTH_LDAPS) != 0 ||
+		(o->flags & LDAP_AUTH_STARTTLS) == 0 ||
 		(o->error = ldap_start_tls_s (o->ldap, NULL, NULL)) == 0;
 }
 
@@ -45,14 +45,18 @@ int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
 
 	o->error = LDAP_PARAM_ERROR;
 	o->answer = NULL;
+	o->flags  = 0;
 
 	if (uri == NULL || uri[strcspn (uri, " ,")] != '\0' ||
 	    (o->error = ldap_initialize (&o->ldap, uri) != 0))
 		return 0;
 
+	if (strncmp (uri, "ldaps://", 8) == 0)
+		o->flags |= LDAP_AUTH_LDAPS;
+
 	if (!ldap_auth_set_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) ||
 	    !ldap_auth_set_options_va (o, ap) ||
-	    !do_tls (o, uri))
+	    !start_tls (o))
 		goto error;
 
 	return 1;

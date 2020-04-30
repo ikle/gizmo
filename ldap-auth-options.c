@@ -20,7 +20,7 @@ static int set_tls (struct ldap_auth *o, const char *tls)
 {
 	int opt;
 
-	o->tls = 0;
+	o->flags &= ~LDAP_AUTH_STARTTLS;
 
 	if (tls == NULL)
 		return 1;
@@ -34,7 +34,7 @@ static int set_tls (struct ldap_auth *o, const char *tls)
 		return 0;
 	}
 
-	o->tls = 1;
+	o->flags |= LDAP_AUTH_STARTTLS;
 	return ldap_auth_set_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt);
 }
 
@@ -82,8 +82,6 @@ static int set_option (struct ldap_auth *o, const char *name, const char *value)
 int ldap_auth_set_options_va (struct ldap_auth *o, va_list ap)
 {
 	const char *name, *value;
-
-	o->tls = 0;
 
 	o->user		= NULL;
 	o->password	= NULL;

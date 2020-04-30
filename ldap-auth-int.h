@@ -12,12 +12,17 @@
 #include <ldap-auth.h>
 #include <ldap.h>
 
+enum ldap_auth_flags {
+	LDAP_AUTH_LDAPS		= 1 << 0,
+	LDAP_AUTH_STARTTLS	= 1 << 1,
+};
+
 struct ldap_auth {
 	LDAP *ldap;
 	int error;
 	LDAPMessage *answer;
 
-	int tls;
+	int flags;
 
 	const char *user;	/* bind DN */
 	const char *password;
