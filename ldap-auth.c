@@ -83,7 +83,7 @@ int ldap_auth_init (struct ldap_auth *o, const struct ldap_auth_conf *c)
 	o->error = LDAP_PARAM_ERROR;
 	o->answer = NULL;
 
-	if (c->uri == NULL ||
+	if (c->uri == NULL || c->uri[strcspn (c->uri, " ,")] != '\0' ||
 	    (o->error = ldap_initialize (&o->ldap, c->uri) != 0))
 		return 0;
 
