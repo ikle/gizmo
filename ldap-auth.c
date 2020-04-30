@@ -65,23 +65,19 @@ static int set_option (struct ldap_auth *o, const char *name, const char *value)
 			return 0;
 	}
 	else if (strcmp (name, "tls-cadir") == 0) {
-		if (value != NULL &&
-		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTDIR, value))
+		if (!ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTDIR, value))
 			return 0;
 	}
 	else if (strcmp (name, "tls-ca") == 0) {
-		if (value != NULL &&
-		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTFILE, value))
+		if (!ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTFILE, value))
 			return 0;
 	}
 	else if (strcmp (name, "tls-cert") == 0) {
-		if (value != NULL &&
-		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CERTFILE, value))
+		if (!ldap_auth_set_option (o, LDAP_OPT_X_TLS_CERTFILE, value))
 			return 0;
 	}
 	else if (strcmp (name, "tls-key") == 0) {
-		if (value != NULL &&
-		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_KEYFILE, value))
+		if (!ldap_auth_set_option (o, LDAP_OPT_X_TLS_KEYFILE, value))
 			return 0;
 	}
 
