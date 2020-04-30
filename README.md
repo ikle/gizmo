@@ -1,5 +1,8 @@
 # LDAP Authentication Helper Library
 
+This library provides a generalized user authentication and authorization
+interface through LDAP.
+
 ## Required options
 
 *  uri — shema://[host[:port]], where the schema is one from ldap, ldaps
