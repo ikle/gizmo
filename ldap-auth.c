@@ -64,22 +64,22 @@ static int set_option (struct ldap_auth *o, const char *name, const char *value)
 		if (!set_tls (o, value))
 			return 0;
 	}
-	else if (strcmp (name, "cadir") == 0) {
+	else if (strcmp (name, "tls-cadir") == 0) {
 		if (value != NULL &&
 		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTDIR, value))
 			return 0;
 	}
-	else if (strcmp (name, "ca") == 0) {
+	else if (strcmp (name, "tls-ca") == 0) {
 		if (value != NULL &&
 		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTFILE, value))
 			return 0;
 	}
-	else if (strcmp (name, "cert") == 0) {
+	else if (strcmp (name, "tls-cert") == 0) {
 		if (value != NULL &&
 		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_CERTFILE, value))
 			return 0;
 	}
-	else if (strcmp (name, "key") == 0) {
+	else if (strcmp (name, "tls-key") == 0) {
 		if (value != NULL &&
 		    !ldap_auth_set_option (o, LDAP_OPT_X_TLS_KEYFILE, value))
 			return 0;

@@ -63,7 +63,7 @@ It is always recommended to use TLS and use it in demand mode.
 
 Optional TLS filelds:
 
-*  cadir — the path of the directory containing CA certificate;
-*  ca — the full-path of the CA certificate file;
-*  cert — the full-path of the client certificate file;
-*  key — the full-path of the client certificate key file.
+*  tls-cadir — the path of the directory containing CA certificate;
+*  tls-ca — the full-path of the CA certificate file;
+*  tls-cert — the full-path of the client certificate file;
+*  tls-key — the full-path of the client certificate key file.
