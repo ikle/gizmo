@@ -263,12 +263,10 @@ int ldap_auth_login (struct ldap_auth *o,
 
 	if (!ldap_auth_bind (o, o->user, o->password)||
 	    !ldap_get_user (o, user))
-		return 0;
-
-	if (ldap_count_entries (o->ldap, o->answer) != 1) {
-		o->error = LDAP_NO_SUCH_OBJECT;
 		goto no_user;
-	}
+
+	if (ldap_count_entries (o->ldap, o->answer) != 1)
+		goto no_uniq;
 
 	e = ldap_first_entry (o->ldap, o->answer);
 
@@ -278,17 +276,15 @@ int ldap_auth_login (struct ldap_auth *o,
 	}
 
 	ok = ldap_check_role (o, dn);
-
-	if (!ldap_auth_bind (o, dn, password) || !ok)
-		goto no_auth;
+	ok = ldap_auth_bind (o, dn, password) && ok;
 
 	ldap_memfree (dn);
-	return 1;
-no_auth:
-	ldap_memfree (dn);
+	return ok;
 no_dn:
-no_user:
+no_uniq:
 	ldap_msgfree (o->answer);
 	o->answer = NULL;
+no_user:
+	o->error = LDAP_INVALID_CREDENTIALS;
 	return 0;
 }
