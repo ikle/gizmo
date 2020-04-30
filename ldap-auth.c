@@ -147,8 +147,7 @@ int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
 	    !do_tls (o, uri))
 		goto error;
 
-	if (o->user != NULL &&
-	    !ldap_auth_bind (o, o->user, o->password))
+	if (!ldap_auth_bind (o, o->user, o->password))
 		goto error;
 
 	return 1;
