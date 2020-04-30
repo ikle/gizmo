@@ -34,8 +34,10 @@ static int set_tls (struct ldap_auth *o, const char *tls)
 	else if (strcmp (tls, "allow")  == 0) opt = LDAP_OPT_X_TLS_ALLOW;
 	else if (strcmp (tls, "try")    == 0) opt = LDAP_OPT_X_TLS_TRY;
 	else if (strcmp (tls, "demand") == 0) opt = LDAP_OPT_X_TLS_DEMAND;
-	else
+	else {
+		o->error = LDAP_PARAM_ERROR;
 		return 0;
+	}
 
 	o->tls = 1;
 	return ldap_auth_set_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt);
