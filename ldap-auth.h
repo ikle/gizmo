@@ -10,6 +10,8 @@
 #define LDAP_AUTH  1
 
 #include <stdarg.h>
+#include <stdio.h>
+
 #include <ldap.h>
 
 struct ldap_auth {
@@ -38,6 +40,8 @@ const char *ldap_auth_error (const struct ldap_auth *o);
 
 int ldap_auth_login (struct ldap_auth *o,
 		     const char *user, const char *password);
+
 char *ldap_auth_get_uid (struct ldap_auth *o);
+void ldap_auth_dump_entries (const struct ldap_auth *o, FILE *to);
 
 #endif  /* LDAP_AUTH */
