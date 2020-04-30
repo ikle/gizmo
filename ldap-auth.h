@@ -12,7 +12,6 @@
 #include <ldap.h>
 
 struct ldap_auth_conf {
-	const char *uri;
 	const char *tls;	/* never, allow, try, demand */
 
 	const char *user;	/* bind DN */
@@ -35,7 +34,8 @@ struct ldap_auth {
 	LDAPMessage *answer;
 };
 
-int  ldap_auth_init (struct ldap_auth *o, const struct ldap_auth_conf *c);
+int  ldap_auth_init (struct ldap_auth *o, const char *uri,
+		     const struct ldap_auth_conf *c);
 void ldap_auth_fini (struct ldap_auth *o);
 
 const char *ldap_auth_error (const struct ldap_auth *o);

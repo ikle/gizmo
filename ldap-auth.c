@@ -65,16 +65,17 @@ static int set_options (struct ldap_auth *o)
 	return 1;
 }
 
-static int do_tls (struct ldap_auth *o)
+static int do_tls (struct ldap_auth *o, const char *uri)
 {
 	const struct ldap_auth_conf *c = o->conf;
 
 	return	c->tls == NULL ||
-		strncmp (c->uri, "ldaps://", 8) == 0 ||
+		strncmp (uri, "ldaps://", 8) == 0 ||
 		ldap_start_tls_s (o->ldap, NULL, NULL) == 0;
 }
 
-int ldap_auth_init (struct ldap_auth *o, const struct ldap_auth_conf *c)
+int ldap_auth_init (struct ldap_auth *o, const char *uri,
+		    const struct ldap_auth_conf *c)
 {
 	const int version = LDAP_VERSION3;
 	struct berval cred;
@@ -83,13 +84,13 @@ int ldap_auth_init (struct ldap_auth *o, const struct ldap_auth_conf *c)
 	o->error = LDAP_PARAM_ERROR;
 	o->answer = NULL;
 
-	if (c->uri == NULL || c->uri[strcspn (c->uri, " ,")] != '\0' ||
-	    (o->error = ldap_initialize (&o->ldap, c->uri) != 0))
+	if (uri == NULL || uri[strcspn (uri, " ,")] != '\0' ||
+	    (o->error = ldap_initialize (&o->ldap, uri) != 0))
 		return 0;
 
 	if (!ldap_auth_set_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) ||
 	    !set_options (o) ||
-	    !do_tls (o))
+	    !do_tls (o, uri))
 		goto error;
 
 	if (c->user != NULL) {

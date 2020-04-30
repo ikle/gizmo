@@ -56,11 +56,10 @@ int main (int argc, char *argv[])
 	struct ldap_auth o;
 	char *uid;
 
-	c.uri    = "ldap://ikle-ldap";
 	c.tls    = "demand";
 	c.userdn = "ou=users,dc=example,dc=com";
 
-	if (!ldap_auth_init (&o, &c)) {
+	if (!ldap_auth_init (&o, "ldap://ikle-ldap", &c)) {
 		fprintf (stderr, "E: Cannot open LDAP connection: %s\n",
 			 ldap_auth_error (&o));
 		return 1;
