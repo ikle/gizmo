@@ -9,6 +9,7 @@
 #ifndef LDAP_AUTH
 #define LDAP_AUTH  1
 
+#include <stdarg.h>
 #include <ldap.h>
 
 struct ldap_auth {
@@ -26,6 +27,7 @@ struct ldap_auth {
 	const char *roledn;	/* group or role base DN */
 };
 
+int  ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap);
 int  ldap_auth_init (struct ldap_auth *o, const char *uri, ...);
 void ldap_auth_fini (struct ldap_auth *o);
 
