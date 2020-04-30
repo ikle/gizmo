@@ -118,10 +118,22 @@ static int do_tls (struct ldap_auth *o, const char *uri)
 		ldap_start_tls_s (o->ldap, NULL, NULL) == 0;
 }
 
+static
+int ldap_auth_bind (struct ldap_auth *o, const char *user, const char *password)
+{
+	struct berval cred;
+
+	cred.bv_val = password == NULL ? "" : (void *) password;
+	cred.bv_len = strlen (cred.bv_val);
+
+	o->error = ldap_sasl_bind_s (o->ldap, user, LDAP_SASL_SIMPLE,
+				     &cred, NULL, NULL, NULL);
+	return o->error == 0;
+}
+
 int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
 {
 	const int version = LDAP_VERSION3;
-	struct berval cred;
 
 	o->error = LDAP_PARAM_ERROR;
 	o->answer = NULL;
@@ -135,15 +147,9 @@ int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
 	    !do_tls (o, uri))
 		goto error;
 
-	if (o->user != NULL) {
-		cred.bv_val = o->password == NULL ? "" : (void *) o->password;
-		cred.bv_len = strlen (cred.bv_val);
-
-		o->error = ldap_sasl_bind_s (o->ldap, o->user, LDAP_SASL_SIMPLE,
-					     &cred, NULL, NULL, NULL);
-		if (o->error != 0)
-			goto error;
-	}
+	if (o->user != NULL &&
+	    !ldap_auth_bind (o, o->user, o->password))
+		goto error;
 
 	return 1;
 error:
@@ -257,7 +263,6 @@ int ldap_auth_login (struct ldap_auth *o,
 {
 	LDAPMessage *e;
 	char *dn;
-	struct berval cred;
 
 	if (!ldap_get_user (o, user))
 		return 0;
@@ -277,12 +282,7 @@ int ldap_auth_login (struct ldap_auth *o,
 	if (!ldap_check_role (o, dn))
 		goto no_role;
 
-	cred.bv_val = password == NULL ? "" : (void *) password;
-	cred.bv_len = strlen (cred.bv_val);
-
-	o->error = ldap_sasl_bind_s (o->ldap, dn, LDAP_SASL_SIMPLE, &cred,
-				     NULL, NULL, NULL);
-	if (o->error != 0)
+	if (!ldap_auth_bind (o, dn, password))
 		goto no_auth;
 
 	ldap_memfree (dn);
