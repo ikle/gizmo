@@ -259,6 +259,7 @@ int ldap_auth_login (struct ldap_auth *o,
 {
 	LDAPMessage *e;
 	char *dn;
+	int ok;
 
 	if (!ldap_auth_bind (o, o->user, o->password)||
 	    !ldap_get_user (o, user))
@@ -276,16 +277,14 @@ int ldap_auth_login (struct ldap_auth *o,
 		goto no_dn;
 	}
 
-	if (!ldap_check_role (o, dn))
-		goto no_role;
+	ok = ldap_check_role (o, dn);
 
-	if (!ldap_auth_bind (o, dn, password))
+	if (!ldap_auth_bind (o, dn, password) || !ok)
 		goto no_auth;
 
 	ldap_memfree (dn);
 	return 1;
 no_auth:
-no_role:
 	ldap_memfree (dn);
 no_dn:
 no_user:
