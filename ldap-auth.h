@@ -31,6 +31,9 @@ int  ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap);
 int  ldap_auth_init (struct ldap_auth *o, const char *uri, ...);
 void ldap_auth_fini (struct ldap_auth *o);
 
+int ldap_auth_set_options_va (struct ldap_auth *o, va_list ap);
+int ldap_auth_set_options    (struct ldap_auth *o, ...);
+
 const char *ldap_auth_error (const struct ldap_auth *o);
 
 int ldap_auth_login (struct ldap_auth *o,
