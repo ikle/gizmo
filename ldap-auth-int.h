@@ -32,4 +32,6 @@ struct ldap_auth {
 	const char *roledn;	/* group or role base DN */
 };
 
+int ldap_auth_set_options_va (struct ldap_auth *o, va_list ap);
+
 #endif  /* LDAP_AUTH_INT */

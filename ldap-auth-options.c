@@ -99,14 +99,3 @@ int ldap_auth_set_options_va (struct ldap_auth *o, va_list ap)
 
 	return 1;
 }
-
-int ldap_auth_set_options (struct ldap_auth *o, ...)
-{
-	va_list ap;
-	int rc;
-
-	va_start (ap, o);
-	rc = ldap_auth_set_options_va (o, ap);
-	va_end (ap);
-	return rc;
-}
