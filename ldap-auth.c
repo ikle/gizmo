@@ -23,7 +23,7 @@ static int do_tls (struct ldap_auth *o, const char *uri)
 {
 	return	!o->tls ||
 		strncmp (uri, "ldaps://", 8) == 0 ||
-		ldap_start_tls_s (o->ldap, NULL, NULL) == 0;
+		(o->error = ldap_start_tls_s (o->ldap, NULL, NULL)) == 0;
 }
 
 static
