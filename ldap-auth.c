@@ -188,7 +188,7 @@ int ldap_auth_login (struct ldap_auth *o,
 	char *dn;
 	int ok;
 
-	if (!ldap_auth_bind (o, o->user, o->password)||
+	if (!ldap_auth_bind (o, o->user, o->password) ||
 	    !ldap_get_user (o, user))
 		goto no_user;
 
