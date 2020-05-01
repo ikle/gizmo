@@ -150,12 +150,16 @@ ldap_fetch (struct ldap_auth *o, const char *basedn, const char *attrs[],
 static
 int ldap_get_user (struct ldap_auth *o, const char *user, const char *attrs[])
 {
+	static const char *def_attrs[] = { "uid", "sAMAccountName", };
 	static const char *filter =
 		"(|"
 		"(&(cn=%1$s)(objectClass=person))"
 		"(&(uid=%1$s)(objectClass=posixAccount))"
 		"(&(sAMAccountName=%1$s)(ObjectClass=User))"
 		")";
+
+	if (attrs == NULL)
+		attrs = def_attrs;
 
 	o->answer = ldap_fetch (o, o->userdn, attrs, filter, user);
 	return o->error == 0;
