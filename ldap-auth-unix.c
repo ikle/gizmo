@@ -43,7 +43,6 @@ int ldap_auth_getent (struct ldap_auth *o, const char *user, struct passwd *p)
 {
 	static const char *attrs[] = {
 		"uid", "sAMAccountName",
-		"userPassword", "unixUserPassword",
 		"uidNumber",
 		"gidNumber",
 		"gecos", "cn",
@@ -63,9 +62,6 @@ int ldap_auth_getent (struct ldap_auth *o, const char *user, struct passwd *p)
 
 	if ((p->pw_name = get_str (o, e, "uid")) == NULL)
 		p->pw_name = get_str (o, e, "sAMAccountName");
-
-	if ((p->pw_passwd = get_str (o, e, "userPassword")) == NULL)
-		p->pw_passwd = get_str (o, e, "unixUserPassword");
 
 	p->pw_uid = get_num (o, e, "uidNumber");
 	p->pw_gid = get_num (o, e, "gidNumber");
