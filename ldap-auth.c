@@ -147,8 +147,8 @@ ldap_fetch (struct ldap_auth *o, const char *basedn, const char *attrs[],
 	return m;
 }
 
-static
-int ldap_get_user (struct ldap_auth *o, const char *user, const char *attrs[])
+int ldap_auth_get_user (struct ldap_auth *o, const char *user,
+			const char *attrs[])
 {
 	static const char *def_attrs[] = { "uid", "sAMAccountName", };
 	static const char *filter =
@@ -198,7 +198,7 @@ int ldap_auth_login (struct ldap_auth *o,
 	int ok;
 
 	if (!ldap_auth_bind (o, o->user, o->password) ||
-	    !ldap_get_user (o, user, NULL))
+	    !ldap_auth_get_user (o, user, NULL))
 		goto no_user;
 
 	if (ldap_count_entries (o->ldap, o->answer) != 1)

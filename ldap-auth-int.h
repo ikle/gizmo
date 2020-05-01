@@ -33,5 +33,7 @@ struct ldap_auth {
 };
 
 int ldap_auth_set_options_va (struct ldap_auth *o, va_list ap);
+int ldap_auth_get_user (struct ldap_auth *o, const char *user,
+			const char *attrs[]);
 
 #endif  /* LDAP_AUTH_INT */
