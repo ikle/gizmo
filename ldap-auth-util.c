@@ -76,6 +76,7 @@ static void dump_attrs (const struct ldap_auth *o, LDAPMessage *e, FILE *to)
 		ldap_value_free_len (vals);
 	}
 }
+
 void ldap_auth_dump_entries (const struct ldap_auth *o, FILE *to)
 {
 	LDAPMessage *e;
