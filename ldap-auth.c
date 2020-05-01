@@ -222,5 +222,6 @@ no_uniq:
 	o->answer = NULL;
 no_user:
 	o->error = LDAP_INVALID_CREDENTIALS;
+	errno = EACCES;
 	return 0;
 }
