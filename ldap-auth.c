@@ -147,7 +147,8 @@ ldap_fetch (struct ldap_auth *o, const char *basedn, const char *attrs[],
 	return m;
 }
 
-static int ldap_get_user (struct ldap_auth *o, const char *user)
+static
+int ldap_get_user (struct ldap_auth *o, const char *user, const char *attrs[])
 {
 	static const char *filter =
 		"(|"
@@ -156,7 +157,7 @@ static int ldap_get_user (struct ldap_auth *o, const char *user)
 		"(&(sAMAccountName=%1$s)(ObjectClass=User))"
 		")";
 
-	o->answer = ldap_fetch (o, o->userdn, NULL, filter, user);
+	o->answer = ldap_fetch (o, o->userdn, attrs, filter, user);
 	return o->error == 0;
 }
 
@@ -193,7 +194,7 @@ int ldap_auth_login (struct ldap_auth *o,
 	int ok;
 
 	if (!ldap_auth_bind (o, o->user, o->password) ||
-	    !ldap_get_user (o, user))
+	    !ldap_get_user (o, user, NULL))
 		goto no_user;
 
 	if (ldap_count_entries (o->ldap, o->answer) != 1)
