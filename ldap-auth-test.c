@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 #include <ldap-auth.h>
+#include <ldap-auth-misc.h>
 
 int main (int argc, char *argv[])
 {
