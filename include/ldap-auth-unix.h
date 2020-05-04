@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#ifndef LDAP_AUTH_UNIX
-#define LDAP_AUTH_UNIX  1
+#ifndef LDAP_AUTH_UNIX_H
+#define LDAP_AUTH_UNIX_H  1
 
 #if defined (__unix__) || defined (__unix) || defined (unix)
 
@@ -31,4 +31,4 @@ struct passwd {
 
 int ldap_auth_getent (struct ldap_auth *o, const char *user, struct passwd *p);
 
-#endif  /* LDAP_AUTH_UNIX */
+#endif  /* LDAP_AUTH_UNIX_H */

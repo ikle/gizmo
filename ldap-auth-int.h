@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#ifndef LDAP_AUTH_INT
-#define LDAP_AUTH_INT  1
+#ifndef LDAP_AUTH_INT_H
+#define LDAP_AUTH_INT_H  1
 
 #include <ldap-auth.h>
 #include <ldap.h>
@@ -36,4 +36,4 @@ int ldap_auth_set_options_va (struct ldap_auth *o, va_list ap);
 int ldap_auth_get_user (struct ldap_auth *o, const char *user,
 			const char *attrs[]);
 
-#endif  /* LDAP_AUTH_INT */
+#endif  /* LDAP_AUTH_INT_H */
