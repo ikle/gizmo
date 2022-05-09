@@ -1,7 +1,7 @@
 /*
  * LDAP Authentication Options
  *
- * Copyright (c) 2020 Alexei A. Smekalkine <ikle@ikle.ru>
+ * Copyright (c) 2020-2022 Alexei A. Smekalkine <ikle@ikle.ru>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -10,7 +10,7 @@
 
 #include "ldap-auth-int.h"
 
-static int ldap_auth_set_option (struct ldap_auth *o, int option, const void *v)
+static int set_ldap_option (struct ldap_auth *o, int option, const void *v)
 {
 	o->error = ldap_set_option (o->ldap, option, v);
 	return o->error == 0;
@@ -35,11 +35,26 @@ static int set_tls (struct ldap_auth *o, const char *tls)
 	}
 
 	o->flags |= LDAP_AUTH_STARTTLS;
-	return ldap_auth_set_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt);
+	return set_ldap_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt);
 }
 
 static int set_option (struct ldap_auth *o, const char *name, const char *value)
 {
+	if (strcmp (name, "tls") == 0)
+		return set_tls (o, value);
+
+	if (strcmp (name, "tls-cadir") == 0)
+		return set_ldap_option (o, LDAP_OPT_X_TLS_CACERTDIR, value);
+
+	if (strcmp (name, "tls-ca") == 0)
+		return set_ldap_option (o, LDAP_OPT_X_TLS_CACERTFILE, value);
+
+	if (strcmp (name, "tls-cert") == 0)
+		return set_ldap_option (o, LDAP_OPT_X_TLS_CERTFILE, value);
+
+	if (strcmp (name, "tls-key") == 0)
+		return set_ldap_option (o, LDAP_OPT_X_TLS_KEYFILE, value);
+
 	if (strcmp (name, "user") == 0)
 		o->user = value;
 
@@ -54,27 +69,6 @@ static int set_option (struct ldap_auth *o, const char *name, const char *value)
 
 	else if (strcmp (name, "roledn") == 0)
 		o->roledn = value;
-
-	else if (strcmp (name, "tls") == 0) {
-		if (!set_tls (o, value))
-			return 0;
-	}
-	else if (strcmp (name, "tls-cadir") == 0) {
-		if (!ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTDIR, value))
-			return 0;
-	}
-	else if (strcmp (name, "tls-ca") == 0) {
-		if (!ldap_auth_set_option (o, LDAP_OPT_X_TLS_CACERTFILE, value))
-			return 0;
-	}
-	else if (strcmp (name, "tls-cert") == 0) {
-		if (!ldap_auth_set_option (o, LDAP_OPT_X_TLS_CERTFILE, value))
-			return 0;
-	}
-	else if (strcmp (name, "tls-key") == 0) {
-		if (!ldap_auth_set_option (o, LDAP_OPT_X_TLS_KEYFILE, value))
-			return 0;
-	}
 
 	return 1;
 }
