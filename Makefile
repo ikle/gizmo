@@ -3,7 +3,7 @@ URL = https://github.com/ikle/gizmo
 
 LIBNAME	= gizmo
 LIBVER	= 0
-LIBREV	= 0.2
+LIBREV	= 0.3
 
 LDFLAGS += -lldap
 

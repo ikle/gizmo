@@ -20,13 +20,13 @@ static int set_tls (struct gizmo *o, const char *tls)
 {
 	int opt;
 
-	o->flags &= ~LDAP_AUTH_STARTTLS;
-
 	if (tls == NULL)
 		goto no_param;
 
-	if (strcmp (tls, "off") == 0)
+	if (strcmp (tls, "off") == 0) {
+		o->flags &= ~LDAP_AUTH_STARTTLS;
 		return 1;
+	}
 
 	if      (strcmp (tls, "never")  == 0) opt = LDAP_OPT_X_TLS_NEVER;
 	else if (strcmp (tls, "allow")  == 0) opt = LDAP_OPT_X_TLS_ALLOW;

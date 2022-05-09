@@ -29,6 +29,7 @@ static int start_tls (struct gizmo *o)
 int gizmo_init_va (struct gizmo *o, const char *uri, va_list ap)
 {
 	const int version = LDAP_VERSION3;
+	const int tls = LDAP_OPT_X_TLS_DEMAND;
 
 	o->error = LDAP_PARAM_ERROR;
 	o->answer = NULL;
@@ -38,10 +39,14 @@ int gizmo_init_va (struct gizmo *o, const char *uri, va_list ap)
 	    (o->error = ldap_initialize (&o->ldap, uri) != 0))
 		return 0;
 
+	if (strncmp (uri, "ldap://", 7) == 0)
+		o->flags |= LDAP_AUTH_STARTTLS;
+	else
 	if (strncmp (uri, "ldaps://", 8) == 0)
 		o->flags |= LDAP_AUTH_LDAPS;
 
 	if (!set_ldap_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) ||
+	    !set_ldap_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &tls) ||
 	    !gizmo_set_options_va (o, ap) ||
 	    !start_tls (o))
 		goto error;

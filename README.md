@@ -9,6 +9,32 @@ interface through LDAP.
    (LDAP over TLS) or ldapi (LDAP over IPC).
 *  userdn — the DN of the entry at which to start the search of user nodes.
 
+## Transport Layer Security
+
+TLS used always with ldaps schema and by default with ldap schema. To modify
+the behavior of TLS, set the tls option to one of the following values:
+
+*  off — disable TLS for ldap or ldapi schema, has no effect in case of
+   ldaps schema;
+*  never — do not request or check any server certificate;
+*  allow — request server certificate and if no certificate is provided or
+   a bad certificate is provided, the session proceeds normally;
+*  try — request server certificate and if no certificate is provided, the
+   session proceeds normally, but if a bad certificate is provided, the
+   session is immediately terminated;
+*  demand — request server certificate and if no certificate is provided or
+   a bad certificate is provided, the session is immediately terminated.
+
+Any value other than off enables TLS. It is always recommended to use TLS
+for remote connections and use it in demand mode (it is the default mode).
+
+Optional TLS filelds:
+
+*  tls-cadir — the path of the directory containing CA certificate;
+*  tls-ca — the full-path of the CA certificate file;
+*  tls-cert — the full-path of the client certificate file;
+*  tls-key — the full-path of the client certificate key file.
+
 ## Authentication on LDAP server
 
 The login service required to search user and group nodes and read it's
@@ -48,25 +74,3 @@ We are support the next classes of groups or roles:
 *  groupOfUniqueNames: user DN must be specified as one of uniqueMember;
 *  organizationalRole: user DN must be specified as one of roleOccupant.
 
-## Transport Layer Security
-
-To use TLS either use LDAPS, or specify tls field with the value from next
-list:
-
-*  never — do not request or check any server certificate;
-*  allow — request server certificate and if no certificate is provided or
-   a bad certificate is provided, the session proceeds normally;
-*  try — request server certificate and if no certificate is provided, the
-   session proceeds normally, but if a bad certificate is provided, the
-   session is immediately terminated;
-*  demand — request server certificate and if no certificate is provided or
-   a bad certificate is provided, the session is immediately terminated.
-
-It is always recommended to use TLS and use it in demand mode.
-
-Optional TLS filelds:
-
-*  tls-cadir — the path of the directory containing CA certificate;
-*  tls-ca — the full-path of the CA certificate file;
-*  tls-cert — the full-path of the client certificate file;
-*  tls-key — the full-path of the client certificate key file.
