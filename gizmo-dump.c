@@ -1,14 +1,14 @@
 /*
- * LDAP Authentication Helper Library Miscelaneous Utilites
+ * LDAP Access Helper Library, Dump helpers
  *
- * Copyright (c) 2020 Alexei A. Smekalkine <ikle@ikle.ru>
+ * Copyright (c) 2020-2022 Alexei A. Smekalkine <ikle@ikle.ru>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include <ldap-auth-misc.h>
+#include <gizmo-misc.h>
 
-#include "ldap-auth-int.h"
+#include "gizmo-int.h"
 
 static void sep (const void *o, FILE *to)
 {
@@ -16,7 +16,7 @@ static void sep (const void *o, FILE *to)
 		putc ('\n', to);
 }
 
-static void dump_attrs (const struct ldap_auth *o, LDAPMessage *e, FILE *to)
+static void dump_attrs (const struct gizmo *o, LDAPMessage *e, FILE *to)
 {
 	char *name;
 	BerElement *be;
@@ -42,7 +42,7 @@ static void dump_attrs (const struct ldap_auth *o, LDAPMessage *e, FILE *to)
 	}
 }
 
-void ldap_auth_dump_entries (const struct ldap_auth *o, FILE *to)
+void gizmo_dump_entries (const struct gizmo *o, FILE *to)
 {
 	LDAPMessage *e;
 

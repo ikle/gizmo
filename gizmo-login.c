@@ -1,5 +1,5 @@
 /*
- * LDAP Authentication Login Helper
+ * LDAP Login Helper
  *
  * Copyright (c) 2020-2022 Alexei A. Smekalkine <ikle@ikle.ru>
  *
@@ -11,9 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ldap-auth-int.h"
+#include "gizmo-int.h"
 
-static int ldap_check_role (struct ldap_auth *o, const char *dn)
+static int ldap_check_role (struct gizmo *o, const char *dn)
 {
 	static const char *attrs[] = { "member", "roleOccupant", };
 	static const char *filter =
@@ -28,7 +28,7 @@ static int ldap_check_role (struct ldap_auth *o, const char *dn)
 	if (o->role == NULL)
 		return 1;
 
-	m = ldap_auth_fetch (o, o->roledn, attrs, filter, o->role, dn);
+	m = gizmo_fetch (o, o->roledn, attrs, filter, o->role, dn);
 	match = o->error == 0 && ldap_count_entries (o->ldap, m) > 0;
 	ldap_msgfree (m);
 
@@ -38,15 +38,14 @@ static int ldap_check_role (struct ldap_auth *o, const char *dn)
 	return match;
 }
 
-int ldap_auth_login (struct ldap_auth *o,
-		     const char *user, const char *password)
+int gizmo_login (struct gizmo *o, const char *user, const char *password)
 {
 	LDAPMessage *e;
 	char *dn;
 	int ldap_error = LDAP_INVALID_CREDENTIALS, ok;
 
-	if (!ldap_auth_bind (o, o->user, o->password) ||
-	    !ldap_auth_get_user (o, user, NULL))
+	if (!gizmo_bind (o, o->user, o->password) ||
+	    !gizmo_get_user (o, user, NULL))
 		goto no_user;
 
 	if (ldap_count_entries (o->ldap, o->answer) != 1)
@@ -59,7 +58,7 @@ int ldap_auth_login (struct ldap_auth *o,
 		goto no_dn;
 	}
 
-	ok = ldap_check_role (o, dn) && ldap_auth_bind (o, dn, password);
+	ok = ldap_check_role (o, dn) && gizmo_bind (o, dn, password);
 
 	ldap_memfree (dn);
 	return ok;

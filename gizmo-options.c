@@ -1,5 +1,5 @@
 /*
- * LDAP Authentication Options
+ * LDAP Access Options
  *
  * Copyright (c) 2020-2022 Alexei A. Smekalkine <ikle@ikle.ru>
  *
@@ -8,15 +8,15 @@
 
 #include <string.h>
 
-#include "ldap-auth-int.h"
+#include "gizmo-int.h"
 
-static int set_ldap_option (struct ldap_auth *o, int option, const void *v)
+static int set_ldap_option (struct gizmo *o, int option, const void *v)
 {
 	o->error = ldap_set_option (o->ldap, option, v);
 	return o->error == 0;
 }
 
-static int set_tls (struct ldap_auth *o, const char *tls)
+static int set_tls (struct gizmo *o, const char *tls)
 {
 	int opt;
 
@@ -38,7 +38,7 @@ static int set_tls (struct ldap_auth *o, const char *tls)
 	return set_ldap_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt);
 }
 
-static int set_option (struct ldap_auth *o, const char *name, const char *value)
+static int set_option (struct gizmo *o, const char *name, const char *value)
 {
 	if (strcmp (name, "tls") == 0)
 		return set_tls (o, value);
@@ -73,7 +73,7 @@ static int set_option (struct ldap_auth *o, const char *name, const char *value)
 	return 1;
 }
 
-int ldap_auth_set_options_va (struct ldap_auth *o, va_list ap)
+int gizmo_set_options_va (struct gizmo *o, va_list ap)
 {
 	const char *name, *value;
 

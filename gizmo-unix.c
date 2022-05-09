@@ -1,5 +1,5 @@
 /*
- * LDAP Authentication Helper Library, UNIX helpers
+ * LDAP Access Helper Library, UNIX helpers
  *
  * Copyright (c) 2020 Alexei A. Smekalkine <ikle@ikle.ru>
  *
@@ -9,11 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <ldap-auth-unix.h>
+#include <gizmo-unix.h>
 
-#include "ldap-auth-int.h"
+#include "gizmo-int.h"
 
-static char *get_str (struct ldap_auth *o, LDAPMessage *e, const char *name)
+static char *get_str (struct gizmo *o, LDAPMessage *e, const char *name)
 {
 	struct berval **vals;
 	char *value;
@@ -26,7 +26,7 @@ static char *get_str (struct ldap_auth *o, LDAPMessage *e, const char *name)
 	return value;
 }
 
-static int get_num (struct ldap_auth *o, LDAPMessage *e, const char *name)
+static int get_num (struct gizmo *o, LDAPMessage *e, const char *name)
 {
 	struct berval **vals;
 	int value;
@@ -39,7 +39,7 @@ static int get_num (struct ldap_auth *o, LDAPMessage *e, const char *name)
 	return value;
 }
 
-int ldap_auth_getent (struct ldap_auth *o, const char *user, struct passwd *p)
+int gizmo_getent (struct gizmo *o, const char *user, struct passwd *p)
 {
 	static const char *attrs[] = {
 		"uid", "sAMAccountName",
@@ -51,7 +51,7 @@ int ldap_auth_getent (struct ldap_auth *o, const char *user, struct passwd *p)
 	};
 	LDAPMessage *e;
 
-	if (!ldap_auth_get_user (o, user, attrs))
+	if (!gizmo_get_user (o, user, attrs))
 		return 0;
 
 	if (o->answer == NULL ||

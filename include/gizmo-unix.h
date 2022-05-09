@@ -1,13 +1,13 @@
 /*
- * LDAP Authentication Helper Library
+ * LDAP Access Helper Library, UNIX helpers
  *
- * Copyright (c) 2020 Alexei A. Smekalkine <ikle@ikle.ru>
+ * Copyright (c) 2020-2022 Alexei A. Smekalkine <ikle@ikle.ru>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#ifndef LDAP_AUTH_UNIX_H
-#define LDAP_AUTH_UNIX_H  1
+#ifndef GIZMO_UNIX_H
+#define GIZMO_UNIX_H  1
 
 #if defined (__unix__) || defined (__unix) || defined (unix)
 
@@ -27,8 +27,8 @@ struct passwd {
 
 #endif  /* not unix */
 
-#include <ldap-auth.h>
+#include <gizmo.h>
 
-int ldap_auth_getent (struct ldap_auth *o, const char *user, struct passwd *p);
+int gizmo_getent (struct gizmo *o, const char *user, struct passwd *p);
 
-#endif  /* LDAP_AUTH_UNIX_H */
+#endif  /* GIZMO_UNIX_H */

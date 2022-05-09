@@ -1,9 +1,9 @@
-DESCRIPTION = LDAP Authentication Helper Library
-URL = https://github.com/ikle/ldap-auth
+DESCRIPTION = LDAP Access Helper Library
+URL = https://github.com/ikle/gizmo
 
-LIBNAME	= ldap-auth
+LIBNAME	= gizmo
 LIBVER	= 0
-LIBREV	= 0.1
+LIBREV	= 0.2
 
 LDFLAGS += -lldap
 

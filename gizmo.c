@@ -1,5 +1,5 @@
 /*
- * LDAP Authentication Helper Library
+ * LDAP Access Helper Library
  *
  * Copyright (c) 2020-2022 Alexei A. Smekalkine <ikle@ikle.ru>
  *
@@ -11,22 +11,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ldap-auth-int.h"
+#include "gizmo-int.h"
 
-static int set_ldap_option (struct ldap_auth *o, int option, const void *v)
+static int set_ldap_option (struct gizmo *o, int option, const void *v)
 {
 	o->error = ldap_set_option (o->ldap, option, v);
 	return o->error == 0;
 }
 
-static int start_tls (struct ldap_auth *o)
+static int start_tls (struct gizmo *o)
 {
 	return	(o->flags & LDAP_AUTH_LDAPS) != 0 ||
 		(o->flags & LDAP_AUTH_STARTTLS) == 0 ||
 		(o->error = ldap_start_tls_s (o->ldap, NULL, NULL)) == 0;
 }
 
-int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
+int gizmo_init_va (struct gizmo *o, const char *uri, va_list ap)
 {
 	const int version = LDAP_VERSION3;
 
@@ -42,7 +42,7 @@ int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
 		o->flags |= LDAP_AUTH_LDAPS;
 
 	if (!set_ldap_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) ||
-	    !ldap_auth_set_options_va (o, ap) ||
+	    !gizmo_set_options_va (o, ap) ||
 	    !start_tls (o))
 		goto error;
 
@@ -52,14 +52,14 @@ error:
 	return 0;
 }
 
-struct ldap_auth *ldap_auth_alloc_va (const char *uri, va_list ap)
+struct gizmo *gizmo_open_va (const char *uri, va_list ap)
 {
-	struct ldap_auth *o;
+	struct gizmo *o;
 
 	if ((o = malloc (sizeof (*o))) == NULL)
 		return NULL;
 
-	if (ldap_auth_init_va (o, uri, ap))
+	if (gizmo_init_va (o, uri, ap))
 		return o;
 
 	free (o);
@@ -67,18 +67,18 @@ struct ldap_auth *ldap_auth_alloc_va (const char *uri, va_list ap)
 	return NULL;
 }
 
-struct ldap_auth *ldap_auth_alloc (const char *uri, ...)
+struct gizmo *gizmo_open (const char *uri, ...)
 {
 	va_list ap;
-	struct ldap_auth *o;
+	struct gizmo *o;
 
 	va_start (ap, uri);
-	o = ldap_auth_alloc_va (uri, ap);
+	o = gizmo_open_va (uri, ap);
 	va_end (ap);
 	return o;
 }
 
-void ldap_auth_free (struct ldap_auth *o)
+void gizmo_close (struct gizmo *o)
 {
 	if (o == NULL)
 		return;
@@ -88,12 +88,12 @@ void ldap_auth_free (struct ldap_auth *o)
 	free (o);
 }
 
-const char *ldap_auth_error (const struct ldap_auth *o)
+const char *gizmo_error (const struct gizmo *o)
 {
 	return ldap_err2string (o->error);
 }
 
-int ldap_auth_bind (struct ldap_auth *o, const char *user, const char *password)
+int gizmo_bind (struct gizmo *o, const char *user, const char *password)
 {
 	struct berval cred;
 
@@ -106,7 +106,7 @@ int ldap_auth_bind (struct ldap_auth *o, const char *user, const char *password)
 }
 
 static LDAPMessage *
-ldap_fetch_va (struct ldap_auth *o, const char *basedn, const char *attrs[],
+ldap_fetch_va (struct gizmo *o, const char *basedn, const char *attrs[],
 	       const char *fmt, va_list ap)
 {
 	int len;
@@ -134,7 +134,7 @@ ldap_fetch_va (struct ldap_auth *o, const char *basedn, const char *attrs[],
 }
 
 LDAPMessage *
-ldap_auth_fetch (struct ldap_auth *o, const char *basedn, const char *attrs[],
+gizmo_fetch (struct gizmo *o, const char *basedn, const char *attrs[],
 		 const char *fmt, ...)
 {
 	va_list ap;
@@ -146,8 +146,7 @@ ldap_auth_fetch (struct ldap_auth *o, const char *basedn, const char *attrs[],
 	return m;
 }
 
-int ldap_auth_get_user (struct ldap_auth *o, const char *user,
-			const char *attrs[])
+int gizmo_get_user (struct gizmo *o, const char *user, const char *attrs[])
 {
 	static const char *def_attrs[] = { "uid", "sAMAccountName", };
 	static const char *filter =
@@ -160,6 +159,6 @@ int ldap_auth_get_user (struct ldap_auth *o, const char *user,
 	if (attrs == NULL)
 		attrs = def_attrs;
 
-	o->answer = ldap_auth_fetch (o, o->userdn, attrs, filter, user);
+	o->answer = gizmo_fetch (o, o->userdn, attrs, filter, user);
 	return o->error == 0;
 }
