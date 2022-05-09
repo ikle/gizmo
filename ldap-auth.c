@@ -211,8 +211,7 @@ int ldap_auth_login (struct ldap_auth *o,
 		goto no_dn;
 	}
 
-	ok = ldap_check_role (o, dn);
-	ok = ldap_auth_bind (o, dn, password) && ok;
+	ok = ldap_check_role (o, dn) && ldap_auth_bind (o, dn, password);
 
 	ldap_memfree (dn);
 	return ok;
