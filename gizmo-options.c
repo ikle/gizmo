@@ -23,19 +23,23 @@ static int set_tls (struct gizmo *o, const char *tls)
 	o->flags &= ~LDAP_AUTH_STARTTLS;
 
 	if (tls == NULL)
+		goto no_param;
+
+	if (strcmp (tls, "off") == 0)
 		return 1;
 
 	if      (strcmp (tls, "never")  == 0) opt = LDAP_OPT_X_TLS_NEVER;
 	else if (strcmp (tls, "allow")  == 0) opt = LDAP_OPT_X_TLS_ALLOW;
 	else if (strcmp (tls, "try")    == 0) opt = LDAP_OPT_X_TLS_TRY;
 	else if (strcmp (tls, "demand") == 0) opt = LDAP_OPT_X_TLS_DEMAND;
-	else {
-		o->error = LDAP_PARAM_ERROR;
-		return 0;
-	}
+	else
+		goto no_param;
 
 	o->flags |= LDAP_AUTH_STARTTLS;
 	return set_ldap_option (o, LDAP_OPT_X_TLS_REQUIRE_CERT, &opt);
+no_param:
+	o->error = LDAP_PARAM_ERROR;
+	return 0;
 }
 
 static int set_option (struct gizmo *o, const char *name, const char *value)
