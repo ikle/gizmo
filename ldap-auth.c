@@ -26,19 +26,6 @@ static int start_tls (struct ldap_auth *o)
 		(o->error = ldap_start_tls_s (o->ldap, NULL, NULL)) == 0;
 }
 
-static
-int ldap_auth_bind (struct ldap_auth *o, const char *user, const char *password)
-{
-	struct berval cred;
-
-	cred.bv_val = password == NULL ? "" : (void *) password;
-	cred.bv_len = strlen (cred.bv_val);
-
-	o->error = ldap_sasl_bind_s (o->ldap, user, LDAP_SASL_SIMPLE,
-				     &cred, NULL, NULL, NULL);
-	return o->error == 0;
-}
-
 int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
 {
 	const int version = LDAP_VERSION3;
@@ -104,6 +91,19 @@ void ldap_auth_free (struct ldap_auth *o)
 const char *ldap_auth_error (const struct ldap_auth *o)
 {
 	return ldap_err2string (o->error);
+}
+
+static
+int ldap_auth_bind (struct ldap_auth *o, const char *user, const char *password)
+{
+	struct berval cred;
+
+	cred.bv_val = password == NULL ? "" : (void *) password;
+	cred.bv_len = strlen (cred.bv_val);
+
+	o->error = ldap_sasl_bind_s (o->ldap, user, LDAP_SASL_SIMPLE,
+				     &cred, NULL, NULL, NULL);
+	return o->error == 0;
 }
 
 static LDAPMessage *
