@@ -31,7 +31,7 @@ int gizmo_init_va (struct gizmo *o, const char *uri, va_list ap)
 	const int version = LDAP_VERSION3;
 	const int tls = LDAP_OPT_X_TLS_DEMAND;
 
-	o->error = LDAP_PARAM_ERROR;
+	o->error  = LDAP_PARAM_ERROR;
 	o->answer = NULL;
 	o->flags  = 0;
 
