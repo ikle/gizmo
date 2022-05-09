@@ -17,6 +17,7 @@ void gizmo_close (struct gizmo *o);
 
 const char *gizmo_error (const struct gizmo *o);
 
+int gizmo_bind  (struct gizmo *o, const char *user, const char *password);
 int gizmo_login (struct gizmo *o, const char *user, const char *password);
 
 #endif  /* GIZMO_H */

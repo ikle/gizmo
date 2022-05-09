@@ -37,7 +37,6 @@ gizmo_fetch (struct gizmo *o, const char *basedn, const char *attrs[],
 	     const char *fmt, ...);
 
 int gizmo_set_options_va (struct gizmo *o, va_list ap);
-int gizmo_bind (struct gizmo *o, const char *user, const char *password);
 
 int gizmo_get_user (struct gizmo *o, const char *user, const char *attrs[]);
 
