@@ -1,7 +1,7 @@
 /*
  * LDAP Authentication Helper Library
  *
- * Copyright (c) 2020 Alexei A. Smekalkine <ikle@ikle.ru>
+ * Copyright (c) 2020-2022 Alexei A. Smekalkine <ikle@ikle.ru>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -13,7 +13,7 @@
 
 #include "ldap-auth-int.h"
 
-static int ldap_auth_set_option (struct ldap_auth *o, int option, const void *v)
+static int set_ldap_option (struct ldap_auth *o, int option, const void *v)
 {
 	o->error = ldap_set_option (o->ldap, option, v);
 	return o->error == 0;
@@ -54,7 +54,7 @@ int ldap_auth_init_va (struct ldap_auth *o, const char *uri, va_list ap)
 	if (strncmp (uri, "ldaps://", 8) == 0)
 		o->flags |= LDAP_AUTH_LDAPS;
 
-	if (!ldap_auth_set_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) ||
+	if (!set_ldap_option (o, LDAP_OPT_PROTOCOL_VERSION, &version) ||
 	    !ldap_auth_set_options_va (o, ap) ||
 	    !start_tls (o))
 		goto error;
