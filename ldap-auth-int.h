@@ -1,7 +1,7 @@
 /*
  * LDAP Authentication Helper Library, Internals
  *
- * Copyright (c) 2020 Alexei A. Smekalkine <ikle@ikle.ru>
+ * Copyright (c) 2020-2022 Alexei A. Smekalkine <ikle@ikle.ru>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -32,8 +32,16 @@ struct ldap_auth {
 	const char *roledn;	/* group or role base DN */
 };
 
+LDAPMessage *
+ldap_auth_fetch (struct ldap_auth *o, const char *basedn, const char *attrs[],
+		 const char *fmt, ...);
+
 int ldap_auth_set_options_va (struct ldap_auth *o, va_list ap);
+int ldap_auth_bind (struct ldap_auth *o, const char *user,
+		    const char *password);
+
 int ldap_auth_get_user (struct ldap_auth *o, const char *user,
 			const char *attrs[]);
+
 
 #endif  /* LDAP_AUTH_INT_H */
