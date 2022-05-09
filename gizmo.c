@@ -164,6 +164,7 @@ int gizmo_get_user (struct gizmo *o, const char *user, const char *attrs[])
 	if (attrs == NULL)
 		attrs = def_attrs;
 
+	ldap_msgfree (o->answer);
 	o->answer = gizmo_fetch (o, o->userdn, attrs, filter, user);
 	return o->error == 0;
 }
