@@ -195,7 +195,7 @@ int ldap_auth_login (struct ldap_auth *o,
 {
 	LDAPMessage *e;
 	char *dn;
-	int ok;
+	int ldap_error = LDAP_INVALID_CREDENTIALS, ok;
 
 	if (!ldap_auth_bind (o, o->user, o->password) ||
 	    !ldap_auth_get_user (o, user, NULL))
@@ -207,7 +207,7 @@ int ldap_auth_login (struct ldap_auth *o,
 	e = ldap_first_entry (o->ldap, o->answer);
 
 	if ((dn = ldap_get_dn (o->ldap, e)) == NULL) {
-		o->error = LDAP_DECODING_ERROR;
+		ldap_error = LDAP_DECODING_ERROR;
 		goto no_dn;
 	}
 
@@ -220,7 +220,7 @@ no_uniq:
 	ldap_msgfree (o->answer);
 	o->answer = NULL;
 no_user:
-	o->error = LDAP_INVALID_CREDENTIALS;
+	o->error = ldap_error;
 	errno = EACCES;
 	return 0;
 }
