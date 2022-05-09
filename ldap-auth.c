@@ -207,7 +207,7 @@ int ldap_auth_login (struct ldap_auth *o,
 	e = ldap_first_entry (o->ldap, o->answer);
 
 	if ((dn = ldap_get_dn (o->ldap, e)) == NULL) {
-		o->error = LDAP_LOCAL_ERROR;
+		o->error = LDAP_DECODING_ERROR;
 		goto no_dn;
 	}
 
