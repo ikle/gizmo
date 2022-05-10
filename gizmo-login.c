@@ -42,7 +42,7 @@ int gizmo_login (struct gizmo *o, const char *user, const char *password)
 {
 	LDAPMessage *e;
 	char *dn;
-	int ldap_error = LDAP_INVALID_CREDENTIALS, ok;
+	int ok;
 
 	if (!gizmo_bind (o, o->user, o->password) ||
 	    !gizmo_get_user (o, user, NULL))
@@ -54,11 +54,10 @@ int gizmo_login (struct gizmo *o, const char *user, const char *password)
 		e = ldap_next_entry (o->ldap, e)
 	) {
 		if ((dn = ldap_get_dn (o->ldap, e)) == NULL) {
-			ldap_error = LDAP_DECODING_ERROR;
+			o->error = LDAP_DECODING_ERROR;
 			continue;
 		}
 
-		ldap_error = LDAP_INVALID_CREDENTIALS;
 		ok = ldap_check_role (o, dn) && gizmo_bind (o, dn, password);
 		ldap_memfree (dn);
 
@@ -66,7 +65,6 @@ int gizmo_login (struct gizmo *o, const char *user, const char *password)
 			return 1;
 	}
 fail:
-	o->error = ldap_error;
 	errno = EACCES;
 	return 0;
 }
