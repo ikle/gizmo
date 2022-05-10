@@ -64,8 +64,6 @@ int gizmo_login (struct gizmo *o, const char *user, const char *password)
 	return ok;
 no_dn:
 no_uniq:
-	ldap_msgfree (o->answer);
-	o->answer = NULL;
 no_user:
 	o->error = ldap_error;
 	errno = EACCES;
