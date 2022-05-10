@@ -46,25 +46,26 @@ int gizmo_login (struct gizmo *o, const char *user, const char *password)
 
 	if (!gizmo_bind (o, o->user, o->password) ||
 	    !gizmo_get_user (o, user, NULL))
-		goto no_user;
+		goto fail;
 
-	if (ldap_count_entries (o->ldap, o->answer) != 1)
-		goto no_uniq;
+	for (
+		e = ldap_first_entry (o->ldap, o->answer);
+		e != NULL;
+		e = ldap_next_entry (o->ldap, e)
+	) {
+		if ((dn = ldap_get_dn (o->ldap, e)) == NULL) {
+			ldap_error = LDAP_DECODING_ERROR;
+			continue;
+		}
 
-	e = ldap_first_entry (o->ldap, o->answer);
+		ldap_error = LDAP_INVALID_CREDENTIALS;
+		ok = ldap_check_role (o, dn) && gizmo_bind (o, dn, password);
+		ldap_memfree (dn);
 
-	if ((dn = ldap_get_dn (o->ldap, e)) == NULL) {
-		ldap_error = LDAP_DECODING_ERROR;
-		goto no_dn;
+		if (ok)
+			return 1;
 	}
-
-	ok = ldap_check_role (o, dn) && gizmo_bind (o, dn, password);
-
-	ldap_memfree (dn);
-	return ok;
-no_dn:
-no_uniq:
-no_user:
+fail:
 	o->error = ldap_error;
 	errno = EACCES;
 	return 0;
