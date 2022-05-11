@@ -51,15 +51,15 @@ int gizmo_login (struct gizmo *o, const char *user, const char *password)
 		e != NULL;
 		e = ldap_next_entry (o->ldap, e)
 	) {
-		ldap_memfree (o->dn);
+		ldap_memfree (o->user);
 
-		if ((o->dn = ldap_get_dn (o->ldap, e)) == NULL) {
+		if ((o->user = ldap_get_dn (o->ldap, e)) == NULL) {
 			o->error = LDAP_DECODING_ERROR;
 			continue;
 		}
 
-		if (ldap_check_role (o, o->dn) &&
-		    gizmo_bind (o, o->dn, password))
+		if (ldap_check_role (o, o->user) &&
+		    gizmo_bind (o, o->user, password))
 			return 1;
 	}
 fail:

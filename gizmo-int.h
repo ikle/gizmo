@@ -23,7 +23,7 @@ struct gizmo {
 	LDAPMessage *answer;
 
 	int flags;
-	char *dn;		/* logged in user DN */
+	char *user;		/* logged in user DN */
 
 	const char *admin;	/* administrative user DN */
 	const char *password;

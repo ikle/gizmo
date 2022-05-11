@@ -34,7 +34,7 @@ int gizmo_init_va (struct gizmo *o, const char *uri, va_list ap)
 	o->error  = LDAP_PARAM_ERROR;
 	o->answer = NULL;
 	o->flags  = 0;
-	o->dn     = NULL;
+	o->user   = NULL;
 
 	if (uri == NULL || uri[strcspn (uri, " ,")] != '\0' ||
 	    (o->error = ldap_initialize (&o->ldap, uri) != 0))
@@ -89,7 +89,7 @@ void gizmo_close (struct gizmo *o)
 	if (o == NULL)
 		return;
 
-	ldap_memfree (o->dn);
+	ldap_memfree (o->user);
 	ldap_msgfree (o->answer);
 	ldap_destroy (o->ldap);
 	free (o);
