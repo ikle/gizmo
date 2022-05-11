@@ -42,7 +42,7 @@ int gizmo_login (struct gizmo *o, const char *user, const char *password)
 {
 	LDAPMessage *e;
 
-	if (!gizmo_bind (o, o->user, o->password) ||
+	if (!gizmo_bind (o, o->admin, o->password) ||
 	    !gizmo_get_user (o, user, NULL))
 		goto fail;
 

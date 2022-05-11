@@ -59,8 +59,8 @@ static int set_option (struct gizmo *o, const char *name, const char *value)
 	if (strcmp (name, "tls-key") == 0)
 		return set_ldap_option (o, LDAP_OPT_X_TLS_KEYFILE, value);
 
-	if (strcmp (name, "user") == 0)
-		o->user = value;
+	if (strcmp (name, "admin") == 0)
+		o->admin = value;
 
 	else if (strcmp (name, "password") == 0)
 		o->password = value;
@@ -81,7 +81,7 @@ int gizmo_set_options_va (struct gizmo *o, va_list ap)
 {
 	const char *name, *value;
 
-	o->user		= NULL;
+	o->admin	= NULL;
 	o->password	= NULL;
 
 	o->userdn	= NULL;

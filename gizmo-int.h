@@ -25,7 +25,7 @@ struct gizmo {
 	int flags;
 	char *dn;		/* logged in user DN */
 
-	const char *user;	/* bind DN */
+	const char *admin;	/* administrative user DN */
 	const char *password;
 
 	const char *userdn;

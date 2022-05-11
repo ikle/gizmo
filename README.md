@@ -41,7 +41,7 @@ The login service required to search user and group nodes and read it's
 attributes. To authenticate login service on LDAP server specify user and
 password options:
 
-*  user — login service DN for simple authentication;
+*  admin — login service DN for simple authentication;
 *  password — login service password for simple authentication.
 
 If user is not specified, then anonymous login for login service will be used.
