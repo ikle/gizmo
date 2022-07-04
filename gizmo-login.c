@@ -28,7 +28,7 @@ static int ldap_check_role (struct gizmo *o, const char *dn)
 	if (o->role == NULL)
 		return 1;
 
-	match = gizmo_fetch (o, o->roledn, attrs, filter, o->role, dn) &&
+	match = gizmo_fetch (o, o->roledn, attrs, GIZMO_SUB, filter, o->role, dn) &&
 		ldap_count_entries (o->ldap, m) > 0;
 
 	ldap_msgfree (o->answer);

@@ -114,7 +114,7 @@ int gizmo_bind (struct gizmo *o, const char *user, const char *password)
 
 static LDAPMessage *
 ldap_fetch_va (struct gizmo *o, const char *basedn, const char *attrs[],
-	       const char *fmt, va_list ap)
+	       int scope, const char *fmt, va_list ap)
 {
 	int len;
 	char *filter;
@@ -127,7 +127,7 @@ ldap_fetch_va (struct gizmo *o, const char *basedn, const char *attrs[],
 
 	vsnprintf (filter, len, fmt, ap);
 
-	o->error = ldap_search_ext_s (o->ldap, basedn, LDAP_SCOPE_SUBTREE,
+	o->error = ldap_search_ext_s (o->ldap, basedn, scope,
 				      filter, (char **) attrs, 0,
 				      NULL, NULL, NULL,
 				      LDAP_NO_LIMIT, &m);
@@ -141,14 +141,14 @@ ldap_fetch_va (struct gizmo *o, const char *basedn, const char *attrs[],
 }
 
 int gizmo_fetch (struct gizmo *o, const char *basedn, const char *attrs[],
-		 const char *fmt, ...)
+		 int scope, const char *fmt, ...)
 {
 	va_list ap;
 
 	ldap_msgfree (o->answer);
 
 	va_start (ap, fmt);
-	o->answer = ldap_fetch_va (o, basedn, attrs, fmt, ap);
+	o->answer = ldap_fetch_va (o, basedn, attrs, scope, fmt, ap);
 	va_end (ap);
 	return o->error == 0;
 }
@@ -166,5 +166,5 @@ int gizmo_get_user (struct gizmo *o, const char *user, const char *attrs[])
 	if (attrs == NULL)
 		attrs = def_attrs;
 
-	return gizmo_fetch (o, o->userdn, attrs, filter, user);
+	return gizmo_fetch (o, o->userdn, attrs, GIZMO_SUB, filter, user);
 }

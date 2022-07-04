@@ -33,8 +33,14 @@ struct gizmo {
 	const char *roledn;	/* group or role base DN */
 };
 
+enum gizmo_scope {
+	GIZMO_BASE	= 0,
+	GIZMO_ONE	= 1,
+	GIZMO_SUB	= 2,
+};
+
 int gizmo_fetch (struct gizmo *o, const char *basedn, const char *attrs[],
-		 const char *fmt, ...);
+		 int scope, const char *fmt, ...);
 
 int gizmo_set_options_va (struct gizmo *o, va_list ap);
 
