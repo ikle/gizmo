@@ -10,6 +10,7 @@
 #define GIZMO_H  1
 
 #include <stdarg.h>
+#include <stddef.h>
 
 struct gizmo *gizmo_open_va (const char *uri, va_list ap);
 struct gizmo *gizmo_open    (const char *uri, ...);
@@ -28,5 +29,10 @@ enum gizmo_scope {
 
 int gizmo_fetch (struct gizmo *o, const char *basedn, const char *attrs[],
 		 int scope, const char *fmt, ...);
+
+typedef int gizmo_cb (struct gizmo *o, const char *name,
+		      const void *data, size_t len, void *cookie);
+
+int gizmo_scan (struct gizmo *o, gizmo_cb cb, void *cookie);
 
 #endif  /* GIZMO_H */
