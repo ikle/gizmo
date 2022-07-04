@@ -140,17 +140,17 @@ ldap_fetch_va (struct gizmo *o, const char *basedn, const char *attrs[],
 	return NULL;
 }
 
-LDAPMessage *
-gizmo_fetch (struct gizmo *o, const char *basedn, const char *attrs[],
+int gizmo_fetch (struct gizmo *o, const char *basedn, const char *attrs[],
 		 const char *fmt, ...)
 {
 	va_list ap;
-	LDAPMessage *m;
+
+	ldap_msgfree (o->answer);
 
 	va_start (ap, fmt);
-	m = ldap_fetch_va (o, basedn, attrs, fmt, ap);
+	o->answer = ldap_fetch_va (o, basedn, attrs, fmt, ap);
 	va_end (ap);
-	return m;
+	return o->error == 0;
 }
 
 int gizmo_get_user (struct gizmo *o, const char *user, const char *attrs[])
@@ -166,7 +166,5 @@ int gizmo_get_user (struct gizmo *o, const char *user, const char *attrs[])
 	if (attrs == NULL)
 		attrs = def_attrs;
 
-	ldap_msgfree (o->answer);
-	o->answer = gizmo_fetch (o, o->userdn, attrs, filter, user);
-	return o->error == 0;
+	return gizmo_fetch (o, o->userdn, attrs, filter, user);
 }

@@ -22,15 +22,17 @@ static int ldap_check_role (struct gizmo *o, const char *dn)
 		"(&(cn=%1$s)(uniqueMember=%2$s)(ObjectClass=groupOfUniqueNames))"
 		"(&(cn=%1$s)(roleOccupant=%2$s)(ObjectClass=organizationalRole))"
 		")";
-	LDAPMessage *m;
+	LDAPMessage *m = o->answer;
 	int match;
 
 	if (o->role == NULL)
 		return 1;
 
-	m = gizmo_fetch (o, o->roledn, attrs, filter, o->role, dn);
-	match = o->error == 0 && ldap_count_entries (o->ldap, m) > 0;
-	ldap_msgfree (m);
+	match = gizmo_fetch (o, o->roledn, attrs, filter, o->role, dn) &&
+		ldap_count_entries (o->ldap, m) > 0;
+
+	ldap_msgfree (o->answer);
+	o->answer = m;
 
 	if (!match)
 		o->error = LDAP_INSUFFICIENT_ACCESS;
