@@ -117,15 +117,17 @@ ldap_fetch_va (struct gizmo *o, const char *basedn, const char *attrs[],
 	       int scope, const char *fmt, va_list ap)
 {
 	int len;
-	char *filter;
+	char *filter = NULL;
 	LDAPMessage *m;
 
-	len = vsnprintf (NULL, 0, fmt, ap) + 1;
+	if (fmt != NULL) {
+		len = vsnprintf (NULL, 0, fmt, ap) + 1;
 
-	if ((filter = malloc (len)) == NULL)
-		return 0;
+		if ((filter = malloc (len)) == NULL)
+			return 0;
 
-	vsnprintf (filter, len, fmt, ap);
+		vsnprintf (filter, len, fmt, ap);
+	}
 
 	o->error = ldap_search_ext_s (o->ldap, basedn, scope,
 				      filter, (char **) attrs, 0,
