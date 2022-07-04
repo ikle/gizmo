@@ -1,4 +1,4 @@
-# LDAP Authentication Helper Library
+# LDAP Access Helper Library
 
 This library provides a generalized user authentication and authorization
 interface through LDAP.
