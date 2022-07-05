@@ -1,7 +1,7 @@
 /*
  * Base64 Filter
  *
- * Copyright (c) 2011 Alexei A. Smekalkine <ikle@ikle.ru>
+ * Copyright (c) 2011-2022 Alexei A. Smekalkine <ikle@ikle.ru>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -15,7 +15,7 @@ static char *b64_table =
 
 void b64_init (struct b64_filter *o, FILE *file, const char *sep)
 {
-	o->saved = 0;  /* need not be initialized, make compiler/lint happy */
+	o->saved = 0;  /* need not to be initialized, make compiler happy */
 	o->count = 0;
 	o->column = 0;
 	o->file = file;
