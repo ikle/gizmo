@@ -6,8 +6,6 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include <assert.h>
-
 #include "base64.h"
 
 static char *b64_table =
@@ -17,9 +15,6 @@ static char *b64_table =
 
 void b64_init (struct b64_filter *o, FILE *file, const char *sep)
 {
-	assert (o != NULL);
-	assert (file != NULL);
-
 	o->saved = 0;  /* need not be initialized, make compiler/lint happy */
 	o->count = 0;
 	o->column = 0;
@@ -29,10 +24,6 @@ void b64_init (struct b64_filter *o, FILE *file, const char *sep)
 
 int b64_putc (struct b64_filter *o, int c)
 {
-	assert (o != NULL);
-	assert (o->count >= 0 && o->count < 3);
-	assert (o->file != NULL);
-
 	/* save data */
 	o->saved <<= 8;
 	o->saved |= (0xff & c);
@@ -61,10 +52,6 @@ int b64_putc (struct b64_filter *o, int c)
 
 int b64_fini (struct b64_filter *o)
 {
-	assert (o != NULL);
-	assert (o->count >= 0 && o->count < 3);
-	assert (o->file != NULL);
-
 	switch (o->count) {
 	case 1:
 		o->saved <<= 16;  /* pad with zeros */
