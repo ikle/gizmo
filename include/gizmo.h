@@ -29,6 +29,7 @@ enum gizmo_scope {
 
 int gizmo_fetch (struct gizmo *o, const char *basedn, const char *attrs[],
 		 int scope, const char *fmt, ...);
+int gizmo_request (struct gizmo *o, const char *req);
 
 typedef int gizmo_cb (struct gizmo *o, const char *name,
 		      const void *data, size_t len, void *cookie);
