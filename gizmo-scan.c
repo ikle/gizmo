@@ -12,7 +12,7 @@ static
 int scan_attrs (struct gizmo *o, LDAPMessage *e, gizmo_cb cb, void *cookie)
 {
 	char *name;
-	BerElement *be;
+	BerElement *be = NULL;
 	int stop = 0;
 	struct berval **vals;
 	size_t i;
@@ -35,6 +35,7 @@ int scan_attrs (struct gizmo *o, LDAPMessage *e, gizmo_cb cb, void *cookie)
 		ldap_value_free_len (vals);
 	}
 
+	ber_free (be, 0);
 	return stop;
 }
 

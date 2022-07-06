@@ -5,6 +5,6 @@ LIBNAME	= gizmo
 LIBVER	= 0
 LIBREV	= 0.4
 
-LDFLAGS += -lldap
+LDFLAGS += -llber -lldap
 
 include make-core.mk

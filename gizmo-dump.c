@@ -40,7 +40,7 @@ static void dump_attr (const char *name, const char *data, size_t len, FILE *to)
 static void dump_attrs (const struct gizmo *o, LDAPMessage *e, FILE *to)
 {
 	char *name;
-	BerElement *be;
+	BerElement *be = NULL;
 	struct berval **vals;
 	size_t i;
 
@@ -60,6 +60,8 @@ static void dump_attrs (const struct gizmo *o, LDAPMessage *e, FILE *to)
 
 		ldap_value_free_len (vals);
 	}
+
+	ber_free (be, 0);
 }
 
 void gizmo_dump_entries (const struct gizmo *o, FILE *to)
