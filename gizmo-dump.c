@@ -59,6 +59,7 @@ static void dump_attrs (const struct gizmo *o, LDAPMessage *e, FILE *to)
 			dump_attr (name, vals[i]->bv_val, vals[i]->bv_len, to);
 
 		ldap_value_free_len (vals);
+		ber_memfree (name);
 	}
 
 	ber_free (be, 0);

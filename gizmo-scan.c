@@ -33,6 +33,7 @@ int scan_attrs (struct gizmo *o, LDAPMessage *e, gizmo_cb cb, void *cookie)
 				   vals[i]->bv_len, cookie);
 
 		ldap_value_free_len (vals);
+		ber_memfree (name);
 	}
 
 	ber_free (be, 0);
