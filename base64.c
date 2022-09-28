@@ -8,7 +8,7 @@
 
 #include "base64.h"
 
-static char *b64_table =
+static const char *b64_table =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	"abcdefghijklmnopqrstuvwxyz"
 	"0123456789+/";
